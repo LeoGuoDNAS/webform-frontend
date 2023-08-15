@@ -106,7 +106,7 @@ export default function Form() {
           <p>"DNAS Connect" is available for download for both iOS and Android devices</p>
           <div className='qr-codes'>
             <div className='qr-code-container'>
-              <img className='qr-code' src='/img/dnas-connect-apple.png' alt='app store qr code'/>
+              <img className='qr-code' src={process.env.PUBLIC_URL + '/img/dnas-connect-apple.png'} alt='app store qr code'/>
               <p><i className="fa-brands fa-app-store-ios"></i>   App Store</p>
               <a className='app-store-button' href='https://apps.apple.com/us/app/dnas-lite/id1531944898'>
                <i className="fa-brands fa-apple"></i>   Get it on App Store
@@ -114,7 +114,7 @@ export default function Form() {
             </div>
             
             <div className='qr-code-container'>
-              <img className='qr-code' src='/img/dnas-connect-google.png' alt='play store qr code'/>
+              <img className='qr-code' src={process.env.PUBLIC_URL + '/img/dnas-connect-google.png'} alt='play store qr code'/>
               <p><i className="fa-brands fa-google-play"></i>   Google Play</p>
               <a className='app-store-button' href='https://play.google.com/store/apps/details?id=com.dayniteit.dnaslite&pcampaignid=web_share'>
                <i className="fa-brands fa-google-play"></i>   Get it on Google Play
