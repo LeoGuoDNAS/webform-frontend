@@ -1,0 +1,133 @@
+.form {
+
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 100px 0px;
+    .form-content {
+        min-width: 30%;
+        max-width: 80%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        font-family: 'Poppins', sans-serif;
+
+        .error {
+            color: red;
+        }
+
+        .form-section {
+            width: 100%;
+            text-align: left;
+
+            .input {
+                box-sizing: border-box;
+                width: 100%;
+                height: 60px;
+                border: none;
+                border-radius: 5px;
+                padding: 15px;
+            }   
+            
+            .select {
+                width: 100%;
+                height: 60px;
+                /* margin: none; */
+                padding: 15px;
+                border: none;
+                border-radius: 5px;
+            }
+
+            .title {
+                font-size: xx-large;
+                font-weight: 500;
+            }
+
+            .subTitle {
+                font-weight: 500;
+
+            }
+
+            .qr-codes {
+                display: flex;
+                overflow: scroll;
+                width: 100%;
+                .qr-code-container {
+                    margin: 50px 0px;
+                    display: flex;
+                    flex-direction: column;
+                    width: 100%;
+                    align-items: center;
+                    .qr-code {
+                        width: 250px;
+                        margin: auto;
+                    }
+                    .app-store-button {
+                        background-color: black;
+                        padding: 15px;
+                        text-decoration: none;
+                        color: white;
+                        border-radius: 10px;
+                    }
+                }
+            }
+
+            .nav-buttons {
+                display: flex;
+                flex-direction: row;
+                width: 100%;
+                margin-top: 40px;
+
+                .form-button {
+                    font-size: medium;
+                    width: 120px;
+                    height: 50px;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+
+                .commercial {
+                    /* align-self: flex-start; */
+                    background-color: #09881D;
+                }
+
+                .residential {
+                    margin-left: auto;
+                    background-color: #3d3d3d;
+                }
+
+                .yes {
+                    background-color: #008A61;
+                }
+
+                .No {
+                    margin-left: auto;
+                    background-color: #8A1900;
+                }
+
+                .back {
+                    background-color: #45008A;
+                }
+
+                .backToHome {
+                    background-color: #45008A;
+                    width: 500px;
+                }
+
+                .next {
+                    /* align-self: flex-end; */
+                    margin-left: auto;
+                    background-color: #00488A;
+                }
+
+                .submit {
+                    margin-left: auto;
+                    background-color: #00068A;
+                }
+            }
+        }
+    }
+}
