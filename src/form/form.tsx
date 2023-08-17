@@ -1,49 +1,85 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import "./form.css";
+import axios from 'axios';
+import FormData from '../models/form';
 
-interface FormData {
-  'Street 1': string;
-  'Street 2'?: string;
-  'Street 3'?: string;
-  'Street 4'?: string;
-  'City': string;
-  'State': string;
-  'Zip': number;
-  "First Name": string;
-  "Last Name": string;
-  "Email Address": string;
-  "Phone Number": number;
-  "Phone Number Ext": number;
-  "Alternative Phone Number": number;
-  "Alternative Phone Number Ext": number;
-  "Manufacturer": string;
-  'Model': string;
-  'Under Manufacturer Warranty': "" | "Yes" | "No";
-  "Recently Serviced": "" | "Yes" | "No";
-  "Service Info": string;
-  "Have PO number" : "" | "Yes" | "No";
-  "Purchase Order Number": number;
-  'Location': string;
-  'Type': "Refrigeration" | "HVAC" | "Kitchen" | "Plumbing";
-  'Description': string
-  'Preferred Date': string;
-  'Preferred Time': "6-9" | "9-12" | "12-2:30";
-  "OT Approved" : "" | "Yes" | "No";
-  "Comments": string;
-}
+// interface FormData {
+//   'Street_1': string;
+//   'Street_2'?: string;
+//   'Street_3'?: string;
+//   'Street_4'?: string;
+//   'City': string;
+//   'State': string;
+//   'Zip': string;
+//   "First_Name": string;
+//   "Last_Name": string;
+//   "Email_Address": string;
+//   "Phone_Number": number;
+//   "Phone_Number_Ext": number;
+//   "Alternative_Phone_Number": number;
+//   "Alternative_Phone_Number_Ext": number;
+//   "Manufacturer": string;
+//   'Model': string;
+//   'Under_Manufacturer_Warranty': "" | "Yes" | "No";
+//   "Recently_Serviced": "" | "Yes" | "No";
+//   "Service_Info": string;
+//   "Require_PO_number" : "" | "Yes" | "No";
+//   "Purchase_Order_Number": string;
+//   'Location': string;
+//   'Type': "Refrigeration" | "HVAC" | "Kitchen" | "Plumbing";
+//   'Description': string
+//   'Preferred_Date': string;
+//   'Preferred_Time': "6-9" | "9-12" | "12-2:30";
+//   "OT_Approved" : "" | "Yes" | "No";
+//   "Comments": string;
+// }
 
 export default function Form() {
-  // const [isRes, setIsRes] = useState(false);
+  
+  const rootUrl = "http://localhost:8000" // replace with deployed URL in production
+
+
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const { register, handleSubmit, formState: { errors }, trigger, reset } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
+    
     // console.log(data);
     const isValid = await trigger(); // trigger validation
     if (isValid) {
-      console.log(data);
+      console.log(data)
+      // console.log(data.Phone_Number_Ext);
+      // if (data.Phone_Number_Ext === null) {
+      //   data.Phone_Number_Ext = -1;
+      // }
+      // if (data.Alternative_Phone_Number === null) {
+      //   data.Alternative_Phone_Number = -1;
+      // }
+      // if (data.Alternative_Phone_Number_Ext === null) {
+      //   data.Alternative_Phone_Number_Ext = -1;
+      // }
+      // console.log(data.Phone_Number_Ext);
+      // const payload = {
+      //   ...data,
+      //   'Alternative_Phone_Number': data.Alternative_Phone_Number ? parseInt(data.Alternative_Phone_Number) : null,
+      // }
+      // try {
+      axios.post(`${rootUrl}/api/v1/submit`, data)
+        .then(response => {
+          console.log("Response data:")
+          console.log(response)
+        })
+        .catch(error => {
+          console.log("There was an error!", error);
+        })
+      // console.log("Response data:")
+      // console.log(response)
+      // } catch (error) {
+      //   console.log("There was an error!", error);
+      // }
+      
       setSubmitted(true);
       reset();
     }
@@ -79,9 +115,20 @@ export default function Form() {
     setStep(-2);
   };
 
+  const test = async () => {
+    try {
+      const zip: Number = 10036;
+      const response = await axios.get(`${rootUrl}/api/v1/clientAddressByZip/${zip}`)
+      console.log(response.data);
+    } catch (error) {
+      console.log("There was an error!", error);
+    }
+  };
+
   return (
     <form className="form" onSubmit={handleSubmit(onSubmit)}>
-      {/* {submitted ? (<></>) : <div>as</div>)} */}
+      
+      <button type="button" onClick={test}>Test</button>
       <div className="form-content">
         { submitted ? <div className='form-section'>
           <h3 className='subTitle'>Thank you for your information</h3>
@@ -130,6 +177,8 @@ export default function Form() {
       {step === 0 && (
         <div className='form-section'>
           <h1 className='title'>Welcome to DNAS Non-Contract Customer Service Request Form</h1>
+          <h3 className='subTitle'>Day & Nite / All Service / Popular Plumbing</h3>
+          <h4 className='subTitle'>Visit our website to learn more about us <a href="https://www.wearetheone.com">www.wearetheone.com</a></h4>
           <p>Are you requesting service for a residential or commercial location?</p>
           <div className="nav-buttons">
             <button className='form-button commercial' type="button" onClick={nextPage}>Commercial</button>
@@ -153,29 +202,44 @@ export default function Form() {
         <div className='form-section'>
           <h1 className='title'>Site Address</h1>
           <p>Street 1 *</p>
-          <input className="input text" type="text" placeholder="Street 1" {...register("Street 1", { required: true })} />
-          {errors['Street 1'] && errors['Street 1'].type === 'required' && <p style={{ color: 'red' }}>Street 1 is required.</p>}
+          <input className="input text" type="text" placeholder="Street 1" {...register("Street_1", { required: true })} />
+          {errors['Street_1'] && errors['Street_1'].type === 'required' && <p style={{ color: 'red' }}>Street 1 is required.</p>}
 
           <p>Street 2</p>
-          <input className="input text" type="text" placeholder="Street 2" {...register("Street 2")} />
+          <input className="input text" type="text" placeholder="Street 2" {...register("Street_2")} />
 
           <p>Street 3</p>
-          <input className="input text" type="text" placeholder="Street 3" {...register("Street 3")} />
+          <input className="input text" type="text" placeholder="Street 3" {...register("Street_3")} />
 
           <p>Street 4</p>
-          <input className="input text" type="text" placeholder="Street 4" {...register("Street 4")} />
+          <input className="input text" type="text" placeholder="Street 4" {...register("Street_4")} />
 
           <p>City *</p>
           <input className="input text" type="text" placeholder="City" {...register("City", { required: true })} />
           {errors['City'] && errors['City'].type === 'required' && <p style={{ color: 'red' }}>City is required.</p>}
 
           <p>State *</p>
-          <input className="input text" type="text" placeholder="State" {...register("State", { required: true })} />
-          {errors['State'] && errors['State'].type === 'required' && <p style={{ color: 'red' }}>State is required.</p>}
+          <input className="input text" type="text" placeholder="State" {...register("State", { 
+            required: "State is required.",
+            pattern: {
+              value: /^[A-Z]{2}$/,
+              message: "State must be 2 captialized letters."
+            }  
+          })} />
+          {errors['State'] && <p style={{ color: 'red' }}>{errors['State'].message}</p>}
+          {/* {errors['State'] && errors['State'].type === 'pattern' && <p style={{ color: 'red' }}>{errors['State'].message}</p>} */}
 
           <p>Zip Code *</p>
-          <input className="input number" type="number" placeholder="Zip Code" {...register("Zip", { required: true })} />
-          {errors['Zip'] && errors['Zip'].type === 'required' && <p style={{ color: 'red' }}>Zip is required.</p>}
+          <input className="input number" type="text" placeholder="Zip Code" {...register("Zip", { 
+            required: "Zip Code is required.",
+            pattern: {
+              value: /^\d{5}$/,
+              message: "Zip Code must be a 5-digit number."
+            }
+          })} />
+          {errors['Zip'] && <p style={{ color: 'red' }}>{errors['Zip'].message}</p>}
+          {/* {errors['Zip'] && errors['Zip'].type === 'pattern' && <p style={{ color: 'red' }}>{errors['Zip'].message}</p>} */}
+          {/* {errors['Zip'] && errors['Zip'].type === 'required' && <p style={{ color: 'red' }}>Zip is required.</p>} */}
 
           <div className="nav-buttons">
             <button className='form-button back' type="button" onClick={back}>Back</button>
@@ -188,28 +252,28 @@ export default function Form() {
         <div className='form-section'>
           <h1 className='title'>Contact Person Details</h1>
           <p>First Name *</p>
-          <input className="input text" type="text" placeholder="First Name" {...register("First Name", {required: true})} />
-          {errors['First Name'] && errors['First Name'].type === 'required' && <p style={{ color: 'red' }}>First Name is required.</p>}
+          <input className="input text" type="text" placeholder="First Name" {...register("First_Name", {required: true})} />
+          {errors['First_Name'] && errors['First_Name'].type === 'required' && <p style={{ color: 'red' }}>First Name is required.</p>}
 
           <p>Last Name</p>
-          <input className="input text" type="text" placeholder="Last Name" {...register("Last Name", {})} />
+          <input className="input text" type="text" placeholder="Last Name" {...register("Last_Name", {})} />
 
           <p>Email Address *</p>
-          <input className="input text" type="text" placeholder="Email Address" {...register("Email Address", {required: true})} />
-          {errors['Email Address'] && errors['Email Address'].type === 'required' && <p style={{ color: 'red' }}>Email Address is required.</p>}
+          <input className="input text" type="text" placeholder="Email Address" {...register("Email_Address", {required: true})} />
+          {errors['Email_Address'] && errors['Email_Address'].type === 'required' && <p style={{ color: 'red' }}>Email Address is required.</p>}
 
           <p>Phone Number *</p>
-          <input className="input number" type="number" placeholder="Phone Number" {...register("Phone Number", {required: true})} />
-          {errors['Phone Number'] && errors['Phone Number'].type === 'required' && <p style={{ color: 'red' }}>Phone Number is required.</p>}
+          <input className="input number" type="number" placeholder="Phone Number" {...register("Phone_Number", {required: true})} />
+          {errors['Phone_Number'] && errors['Phone_Number'].type === 'required' && <p style={{ color: 'red' }}>Phone Number is required.</p>}
 
-          <p>Ext.</p>
-          <input className="input number" type="number" placeholder="Ext" {...register("Phone Number Ext", {})} />
+          <p>Phone Number Ext.</p>
+          <input className="input number" type="number" placeholder="Ext" {...register("Phone_Number_Ext", {})} />
 
           <p>Alternative Phone Number</p>
-          <input className="input number" type="number" placeholder="Alternative Phone Number" {...register("Alternative Phone Number", {})} />
+          <input className="input number" type="number" placeholder="Alternative Phone Number" {...register("Alternative_Phone_Number", {})} />
 
-          <p>Ext.</p>
-          <input className="input number" type="number" placeholder="Ext" {...register("Alternative Phone Number Ext", {})} />
+          <p>Alternative Phone Number Ext.</p>
+          <input className="input number" type="number" placeholder="Ext" {...register("Alternative_Phone_Number_Ext", {})} />
           
           <div className="nav-buttons">
             <button className='form-button back' type="button" onClick={back}>Back</button>
@@ -228,31 +292,31 @@ export default function Form() {
           <input className="input text" type="text" placeholder="Model" {...register("Model", {})} />
 
           <p>Under Manufacturer Warranty?</p>
-          <select className="select"  {...register("Under Manufacturer Warranty")}>
-            <option value=""></option>
+          <select className="select"  {...register("Under_Manufacturer_Warranty")}>
+            <option value="-"></option>
             <option value="Yes">Yes</option>
-            <option value=" No"> No</option>
+            <option value="No"> No</option>
           </select>
 
           <p>Has the equipment been serviced in the last 30 days?</p>
-          <select className="select" {...register("Recently Serviced")}>
-            <option value=""></option>
+          <select className="select" {...register("Recently_Serviced")}>
+            <option value="-"></option>
             <option value="Yes">Yes</option>
-            <option value=" No"> No</option>
+            <option value="No"> No</option>
           </select>
 
           <p>If yes, enter relevant Information:</p>
-          <textarea className="input textarea" {...register("Service Info", {})} />
+          <textarea className="input textarea" {...register("Service_Info", {})} />
 
-          <p>Do you have a purchase order number?</p>
-          <select className="select" {...register("Have PO number")}>
-            <option value=""></option>
+          <p>Do you require a purchase order number?</p>
+          <select className="select" {...register("Require_PO_number")}>
+            <option value="-"></option>
             <option value="Yes">Yes</option>
-            <option value=" No"> No</option>
+            <option value="No"> No</option>
           </select>
 
           <p>Purchase Order Number</p>
-          <input className="input text" type="text" placeholder="Purchase Order Number" {...register("Purchase Order Number", {})} />
+          <input className="input text" type="text" placeholder="Purchase Order Number" {...register("Purchase_Order_Number", {})} />
           
           <div className="nav-buttons">
             <button className='form-button back' type="button" onClick={back}>Back</button>
@@ -294,23 +358,23 @@ export default function Form() {
         <div className='form-section'>
           <h1 className='title'>Availability</h1>
           <p>Preferred Date *</p>
-          <input className="input date" type="date" placeholder="Preferred Date" {...register("Preferred Date", {required: true})} />
-          {errors['Preferred Date'] && errors['Preferred Date'].type === 'required' && <p style={{ color: 'red' }}>Preferred Date is required.</p>}
+          <input className="input date" type="date" placeholder="Preferred Date" {...register("Preferred_Date", {required: true})} />
+          {errors['Preferred_Date'] && errors['Preferred_Date'].type === 'required' && <p style={{ color: 'red' }}>Preferred Date is required.</p>}
 
           <p>Preferred Time *</p>
-          <select className="select" {...register("Preferred Time", { required: true })}>
+          <select className="select" {...register("Preferred_Time", { required: true })}>
             <option value="" disabled selected hidden>Select an option...</option>
             <option value="6-9">6-9</option>
-            <option value=" 9-12"> 9-12</option>
-            <option value=" 12-2:30"> 12-2:30</option>
+            <option value="9-12"> 9-12</option>
+            <option value="12-2:30"> 12-2:30</option>
           </select>
-          {errors['Preferred Time'] && errors['Preferred Time'].type === 'required' && <p style={{ color: 'red' }}>Preferred Time is required.</p>}
+          {errors['Preferred_Time'] && errors['Preferred_Time'].type === 'required' && <p style={{ color: 'red' }}>Preferred Time is required.</p>}
 
           <p>O/T Approved</p>
-          <select className="select" {...register("OT Approved")}>
-            <option value=""></option>
+          <select className="select" {...register("OT_Approved")}>
+            <option value="-"></option>
             <option value="Yes">Yes</option>
-            <option value=" No"> No</option>
+            <option value="No"> No</option>
           </select>
 
           <p>Additional Comments</p>

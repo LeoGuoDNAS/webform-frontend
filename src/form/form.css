@@ -51,13 +51,16 @@
 
             .qr-codes {
                 display: flex;
-                overflow: scroll;
+                flex-direction: row;
+                flex-wrap: wrap;
+                /* overflow-wrap: normal; */
+                /* overflow: scroll; */
                 width: 100%;
                 .qr-code-container {
-                    margin: 50px 0px;
+                    margin: 50px;
                     display: flex;
                     flex-direction: column;
-                    width: 100%;
+                    /* width: 100%; */
                     align-items: center;
                     .qr-code {
                         width: 250px;
@@ -72,6 +75,7 @@
                     }
                 }
             }
+
 
             .nav-buttons {
                 display: flex;
