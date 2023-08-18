@@ -4,41 +4,9 @@ import "./form.css";
 import axios from 'axios';
 import FormData from '../models/form';
 
-// interface FormData {
-//   'Street_1': string;
-//   'Street_2'?: string;
-//   'Street_3'?: string;
-//   'Street_4'?: string;
-//   'City': string;
-//   'State': string;
-//   'Zip': string;
-//   "First_Name": string;
-//   "Last_Name": string;
-//   "Email_Address": string;
-//   "Phone_Number": number;
-//   "Phone_Number_Ext": number;
-//   "Alternative_Phone_Number": number;
-//   "Alternative_Phone_Number_Ext": number;
-//   "Manufacturer": string;
-//   'Model': string;
-//   'Under_Manufacturer_Warranty': "" | "Yes" | "No";
-//   "Recently_Serviced": "" | "Yes" | "No";
-//   "Service_Info": string;
-//   "Require_PO_number" : "" | "Yes" | "No";
-//   "Purchase_Order_Number": string;
-//   'Location': string;
-//   'Type': "Refrigeration" | "HVAC" | "Kitchen" | "Plumbing";
-//   'Description': string
-//   'Preferred_Date': string;
-//   'Preferred_Time': "6-9" | "9-12" | "12-2:30";
-//   "OT_Approved" : "" | "Yes" | "No";
-//   "Comments": string;
-// }
-
 export default function Form() {
   
   const rootUrl = "http://localhost:8000" // replace with deployed URL in production
-
 
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -49,37 +17,18 @@ export default function Form() {
     // console.log(data);
     const isValid = await trigger(); // trigger validation
     if (isValid) {
+      console.log("Form data:")
       console.log(data)
-      // console.log(data.Phone_Number_Ext);
-      // if (data.Phone_Number_Ext === null) {
-      //   data.Phone_Number_Ext = -1;
-      // }
-      // if (data.Alternative_Phone_Number === null) {
-      //   data.Alternative_Phone_Number = -1;
-      // }
-      // if (data.Alternative_Phone_Number_Ext === null) {
-      //   data.Alternative_Phone_Number_Ext = -1;
-      // }
-      // console.log(data.Phone_Number_Ext);
-      // const payload = {
-      //   ...data,
-      //   'Alternative_Phone_Number': data.Alternative_Phone_Number ? parseInt(data.Alternative_Phone_Number) : null,
-      // }
-      // try {
+      
       axios.post(`${rootUrl}/api/v1/submit`, data)
         .then(response => {
           console.log("Response data:")
-          console.log(response)
+          console.log(response.data)
         })
         .catch(error => {
           console.log("There was an error!", error);
         })
-      // console.log("Response data:")
-      // console.log(response)
-      // } catch (error) {
-      //   console.log("There was an error!", error);
-      // }
-      
+        
       setSubmitted(true);
       reset();
     }
@@ -115,20 +64,20 @@ export default function Form() {
     setStep(-2);
   };
 
-  const test = async () => {
-    try {
-      const zip: Number = 10036;
-      const response = await axios.get(`${rootUrl}/api/v1/clientAddressByZip/${zip}`)
-      console.log(response.data);
-    } catch (error) {
-      console.log("There was an error!", error);
-    }
-  };
+  // const test = async () => {
+  //   try {
+  //     const zip: Number = 10036;
+  //     const response = await axios.get(`${rootUrl}/api/v1/clientAddressByZip/${zip}`)
+  //     console.log(response.data);
+  //   } catch (error) {
+  //     console.log("There was an error!", error);
+  //   }
+  // };
 
   return (
     <form className="form" onSubmit={handleSubmit(onSubmit)}>
       
-      <button type="button" onClick={test}>Test</button>
+      {/* <button type="button" onClick={test}>Test</button> */}
       <div className="form-content">
         { submitted ? <div className='form-section'>
           <h3 className='subTitle'>Thank you for your information</h3>
