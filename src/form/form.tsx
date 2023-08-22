@@ -1,26 +1,47 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import "./form.css";
 import axios from 'axios';
-import FormData from '../models/form';
+import FormModel from '../models/formModel';
 
 export default function Form() {
-  
+  // TODO: Replace with frontend URL
   const rootUrl = "http://localhost:8000" // replace with deployed URL in production
-
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  // TODO: Default value is 0
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
-  const { register, handleSubmit, formState: { errors }, trigger, reset } = useForm<FormData>();
+  const [requirePO, setRequirePO] = useState(false);
+  const { register, handleSubmit, formState: { errors }, trigger, reset, control } = useForm<FormModel>();
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormModel) => {
     
     // console.log(data);
     const isValid = await trigger(); // trigger validation
     if (isValid) {
       console.log("Form data:")
       console.log(data)
+
+      const formData = new FormData()
+      Object.entries(data).forEach(([key, value]) => {
+        if (key !== "Images" && value !== null && value !== undefined) {
+          formData.append(key, value.toString());
+        }
+      });
+      if (data.Images) {
+        for (let i = 0; i < data.Images.length; i++) {
+          formData.append("Images", data.Images[i]);
+        }
+      }
       
-      axios.post(`${rootUrl}/api/v1/submit`, data)
+      console.log("Form data (After Conversion):")
+      console.log(formData)
+
+      axios.post(`${rootUrl}/api/v1/submit`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
         .then(response => {
           console.log("Response data:")
           console.log(response.data)
@@ -28,7 +49,23 @@ export default function Form() {
         .catch(error => {
           console.log("There was an error!", error);
         })
-        
+      // if (data.Images) {
+      //   const images = new FormData()
+      //   for (let i = 0; i < data.Images.length; i++) {
+      //     images.append("Images", data.Images[i]);
+      //   }
+      //   axios.post(`${rootUrl}/api/v1/imageUpload`, images, {
+      //     headers: {
+      //       'Content-Type': 'multipart/form-data'
+      //     }
+      //   })
+      //     .then(response => {
+      //       console.log(response.data)
+      //     })
+      //     .catch(error => {
+      //       console.log("Error uploading image", error)
+      //     })
+      // }
       setSubmitted(true);
       reset();
     }
@@ -54,6 +91,8 @@ export default function Form() {
   const newRequest = async () => {
     setStep(0);
     setSubmitted(false)
+    setRequirePO(false)
+    setSelectedFiles(null)
   };
 
   const isResidential = async () => {
@@ -64,15 +103,48 @@ export default function Form() {
     setStep(-2);
   };
 
-  // const test = async () => {
-  //   try {
-  //     const zip: Number = 10036;
-  //     const response = await axios.get(`${rootUrl}/api/v1/clientAddressByZip/${zip}`)
-  //     console.log(response.data);
-  //   } catch (error) {
-  //     console.log("There was an error!", error);
-  //   }
-  // };
+  interface ImageUploaderProps {
+    onChange: (files: FileList | null) => void;
+    value?: FileList | null;
+  }
+
+  const ImageUploader: React.FC<ImageUploaderProps> = ({ onChange, value }) => {
+    return (
+      <div className="file-upload">
+        <p className="file-upload-info">Select images from your device, up to 5 images</p>
+        <p className="file-upload-info">Currently selected:  <span>{selectedFiles?.length === undefined ? 0 : selectedFiles?.length}</span></p>
+        
+        {value && Array.from(value).map((file, index) => (
+          <img 
+            key={index} 
+            src={URL.createObjectURL(file)} 
+            alt={`Preview ${index}`}
+            className='file-upload-preview' 
+          />
+        ))}
+        
+        <input
+          id="file-upload"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => {
+            const files = e.target.files;
+            if (files && files.length > 5) {
+              alert('You can select a maximum of 5 images only.');
+              return; 
+            }
+            onChange(files);
+            setSelectedFiles(files);
+          }}
+          className="file-upload-input"
+        />
+        <label htmlFor="file-upload" className="file-upload-label">
+          <i className="fa-solid fa-upload fa-2xl" style={{"color": "#ffffff"}}></i>
+        </label>
+      </div>
+    );
+  };
 
   return (
     <form className="form" onSubmit={handleSubmit(onSubmit)}>
@@ -80,10 +152,10 @@ export default function Form() {
       {/* <button type="button" onClick={test}>Test</button> */}
       <div className="form-content">
         { submitted ? <div className='form-section'>
-          <h3 className='subTitle'>Thank you for your information</h3>
+          <h3 className='subTitle'>Thank you, your request has been recorded</h3>
           <p>Our agents will reach out soon.</p>
           <div className="nav-buttons">
-            <button className='form-button backToHome' type="button" onClick={newRequest}>Start a new request</button>
+            <button className='form-button backToHome' type="button" onClick={newRequest}>Home</button>
           </div>
         </div>
          : <>
@@ -125,6 +197,7 @@ export default function Form() {
 
       {step === 0 && (
         <div className='form-section'>
+          <img src={process.env.PUBLIC_URL + '/img/dnas-logo.png'} alt='DNAS Logo' />
           <h1 className='title'>Welcome to DNAS Non-Contract Customer Service Request Form</h1>
           <h3 className='subTitle'>Day & Nite / All Service / Popular Plumbing</h3>
           <h4 className='subTitle'>Visit our website to learn more about us <a href="https://www.wearetheone.com">www.wearetheone.com</a></h4>
@@ -150,7 +223,7 @@ export default function Form() {
       {step === 2 && (
         <div className='form-section'>
           <h1 className='title'>Site Address</h1>
-          <p>Street 1 *</p>
+          <p>Street 1 <span className='required'>*</span></p>
           <input className="input text" type="text" placeholder="Street 1" {...register("Street_1", { required: true })} />
           {errors['Street_1'] && errors['Street_1'].type === 'required' && <p style={{ color: 'red' }}>Street 1 is required.</p>}
 
@@ -163,11 +236,11 @@ export default function Form() {
           <p>Street 4</p>
           <input className="input text" type="text" placeholder="Street 4" {...register("Street_4")} />
 
-          <p>City *</p>
+          <p>City <span className='required'>*</span></p>
           <input className="input text" type="text" placeholder="City" {...register("City", { required: true })} />
           {errors['City'] && errors['City'].type === 'required' && <p style={{ color: 'red' }}>City is required.</p>}
 
-          <p>State *</p>
+          <p>State <span className='required'>*</span></p>
           <input className="input text" type="text" placeholder="State" {...register("State", { 
             required: "State is required.",
             pattern: {
@@ -178,7 +251,7 @@ export default function Form() {
           {errors['State'] && <p style={{ color: 'red' }}>{errors['State'].message}</p>}
           {/* {errors['State'] && errors['State'].type === 'pattern' && <p style={{ color: 'red' }}>{errors['State'].message}</p>} */}
 
-          <p>Zip Code *</p>
+          <p>Zip Code <span className='required'>*</span></p>
           <input className="input number" type="text" placeholder="Zip Code" {...register("Zip", { 
             required: "Zip Code is required.",
             pattern: {
@@ -200,18 +273,18 @@ export default function Form() {
       {step === 3 && (
         <div className='form-section'>
           <h1 className='title'>Contact Person Details</h1>
-          <p>First Name *</p>
+          <p>First Name <span className='required'>*</span></p>
           <input className="input text" type="text" placeholder="First Name" {...register("First_Name", {required: true})} />
           {errors['First_Name'] && errors['First_Name'].type === 'required' && <p style={{ color: 'red' }}>First Name is required.</p>}
 
           <p>Last Name</p>
           <input className="input text" type="text" placeholder="Last Name" {...register("Last_Name", {})} />
 
-          <p>Email Address *</p>
+          <p>Email Address <span className='required'>*</span></p>
           <input className="input text" type="text" placeholder="Email Address" {...register("Email_Address", {required: true})} />
           {errors['Email_Address'] && errors['Email_Address'].type === 'required' && <p style={{ color: 'red' }}>Email Address is required.</p>}
 
-          <p>Phone Number *</p>
+          <p>Phone Number <span className='required'>*</span></p>
           <input className="input number" type="number" placeholder="Phone Number" {...register("Phone_Number", {required: true})} />
           {errors['Phone_Number'] && errors['Phone_Number'].type === 'required' && <p style={{ color: 'red' }}>Phone Number is required.</p>}
 
@@ -241,14 +314,14 @@ export default function Form() {
           <input className="input text" type="text" placeholder="Model" {...register("Model", {})} />
 
           <p>Under Manufacturer Warranty?</p>
-          <select className="select"  {...register("Under_Manufacturer_Warranty")}>
+          <select className="select" defaultValue="-" {...register("Under_Manufacturer_Warranty")}>
             <option value="-"></option>
             <option value="Yes">Yes</option>
             <option value="No"> No</option>
           </select>
 
           <p>Has the equipment been serviced in the last 30 days?</p>
-          <select className="select" {...register("Recently_Serviced")}>
+          <select className="select" defaultValue="-" {...register("Recently_Serviced")}>
             <option value="-"></option>
             <option value="Yes">Yes</option>
             <option value="No"> No</option>
@@ -258,15 +331,23 @@ export default function Form() {
           <textarea className="input textarea" {...register("Service_Info", {})} />
 
           <p>Do you require a purchase order number?</p>
-          <select className="select" {...register("Require_PO_number")}>
+          <select className="select" defaultValue="-" {...register("Require_PO_number")} onChange={(e) => {
+            const value = e.target.value;
+            if (value === "Yes") {
+              setRequirePO(true);
+            } else {
+              setRequirePO(false);
+            }
+          }}>
             <option value="-"></option>
             <option value="Yes">Yes</option>
             <option value="No"> No</option>
           </select>
 
-          <p>Purchase Order Number</p>
-          <input className="input text" type="text" placeholder="Purchase Order Number" {...register("Purchase_Order_Number", {})} />
-          
+          <p>Purchase Order Number {requirePO && <span className='required'>*</span>}</p>
+          <input className="input text" type="text" placeholder="Purchase Order Number" {...register("Purchase_Order_Number", {required: requirePO})} />
+          {errors['Purchase_Order_Number'] && errors['Purchase_Order_Number'].type === 'required' && <p style={{ color: 'red' }}>Purchase Order Number is required.</p>}
+
           <div className="nav-buttons">
             <button className='form-button back' type="button" onClick={back}>Back</button>
             <button className='form-button next' type="button" onClick={nextPage}>Next</button>
@@ -277,25 +358,36 @@ export default function Form() {
       {step === 5 && (
         <div className='form-section'>
           <h1 className='title'>Service Requirements</h1>
-          <p>Exact Location (Instructions of access) *</p>
+          <p>Exact Location (Instructions of access) <span className='required'>*</span></p>
           <input className="input text" type="text" placeholder="Location" {...register("Location", {required: true})} />
           {errors['Location'] && errors['Location'].type === 'required' && <p style={{ color: 'red' }}>Exact Location (Instructions of access) is required.</p>}
 
 
-          <p>Equipment Type *</p>
+          <p>Equipment Type <span className='required'>*</span></p>
           <select className="select" {...register("Type", { required: true })}>
             <option value="" disabled selected hidden>Select an option...</option>
             <option value="Refrigeration">Refrigeration</option>
-            <option value="HVAC"> HVAC</option>
-            <option value="Kitchen"> Kitchen</option>
-            <option value="Plumbing"> Plumbing</option>
+            <option value="HVAC">HVAC</option>
+            <option value="Kitchen">Kitchen</option>
+            <option value="Plumbing">Plumbing</option>
           </select>
           {errors['Type'] && errors['Type'].type === 'required' && <p style={{ color: 'red' }}>Equipment Type is required.</p>}
 
-          <p>Description of Problem *</p>
+          <p>Description of Problem <span className='required'>*</span></p>
           <textarea className="input textarea" {...register("Description", {required: true})} />
           {errors['Description'] && errors['Description'].type === 'required' && <p style={{ color: 'red' }}>Description of Problem is required.</p>}
           
+          <p>Upload Images</p>
+          
+          <Controller
+            name="Images"
+            control={control}
+            defaultValue={null}
+            render={({ field }) => (
+              <ImageUploader onChange={field.onChange} value={field.value} />
+            )}
+          />
+
           <div className="nav-buttons">
             <button className='form-button back' type="button" onClick={back}>Back</button>
             <button className='form-button next' type="button" onClick={nextPage}>Next</button>
@@ -306,21 +398,21 @@ export default function Form() {
       {step === 6 && (
         <div className='form-section'>
           <h1 className='title'>Availability</h1>
-          <p>Preferred Date *</p>
+          <p>Preferred Date <span className='required'>*</span></p>
           <input className="input date" type="date" placeholder="Preferred Date" {...register("Preferred_Date", {required: true})} />
           {errors['Preferred_Date'] && errors['Preferred_Date'].type === 'required' && <p style={{ color: 'red' }}>Preferred Date is required.</p>}
 
-          <p>Preferred Time *</p>
+          <p>Preferred Time <span className='required'>*</span></p>
           <select className="select" {...register("Preferred_Time", { required: true })}>
             <option value="" disabled selected hidden>Select an option...</option>
             <option value="6-9">6-9</option>
-            <option value="9-12"> 9-12</option>
-            <option value="12-2:30"> 12-2:30</option>
+            <option value="9-12">9-12</option>
+            <option value="12-2:30">12-2:30</option>
           </select>
           {errors['Preferred_Time'] && errors['Preferred_Time'].type === 'required' && <p style={{ color: 'red' }}>Preferred Time is required.</p>}
 
           <p>O/T Approved</p>
-          <select className="select" {...register("OT_Approved")}>
+          <select className="select" defaultValue="-" {...register("OT_Approved")}>
             <option value="-"></option>
             <option value="Yes">Yes</option>
             <option value="No"> No</option>

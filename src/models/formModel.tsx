@@ -17,7 +17,7 @@ enum PreferredTime {
     TIME_12_2_30 = "12-2:30"
 }
 
-export default interface FormData {
+export default interface FormModel {
     'Street_1': string;
     'Street_2'?: string;
     'Street_3'?: string;
@@ -46,4 +46,5 @@ export default interface FormData {
     'Preferred_Time': PreferredTime;
     "OT_Approved" : YesOrNo;
     "Comments": string;
+    "Images": FileList | null;
 }
