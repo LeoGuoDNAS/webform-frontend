@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import "./form.css";
 import axios from 'axios';
-import FormModel from '../models/formModel';
+import {FormModel, AddressValidationProps} from '../models/formModel';
+// import {validateAddress, AddressValidationProps} from '../validation/validation';
+
+// require('dotenv').config();
 
 export default function Form() {
   // TODO: Replace with frontend URL
@@ -12,7 +15,8 @@ export default function Form() {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [requirePO, setRequirePO] = useState(false);
-  const { register, handleSubmit, formState: { errors }, trigger, reset, control } = useForm<FormModel>();
+  // const [addressIsValid, setAddressIsValid] = useState(false);
+  const { register, handleSubmit, formState: { errors }, trigger, reset, control, watch } = useForm<FormModel>();
 
   const onSubmit = async (data: FormModel) => {
     
@@ -34,8 +38,6 @@ export default function Form() {
         }
       }
       
-      console.log("Form data (After Conversion):")
-      console.log(formData)
 
       axios.post(`${rootUrl}/api/v1/submit`, formData, {
         headers: {
@@ -49,25 +51,81 @@ export default function Form() {
         .catch(error => {
           console.log("There was an error!", error);
         })
-      // if (data.Images) {
-      //   const images = new FormData()
-      //   for (let i = 0; i < data.Images.length; i++) {
-      //     images.append("Images", data.Images[i]);
-      //   }
-      //   axios.post(`${rootUrl}/api/v1/imageUpload`, images, {
-      //     headers: {
-      //       'Content-Type': 'multipart/form-data'
-      //     }
-      //   })
-      //     .then(response => {
-      //       console.log(response.data)
-      //     })
-      //     .catch(error => {
-      //       console.log("Error uploading image", error)
-      //     })
-      // }
-      setSubmitted(true);
-      reset();
+
+      // TODO: uncomment these two lines for production
+      // setSubmitted(true);
+      // reset();
+      // setAddressIsValid(false);
+    }
+  };
+
+  const addressValidation = async () => {
+    const isValid = await trigger(); // trigger validation\
+
+    // validate address
+    const street1 = watch('Street_1')
+    const street2 = watch('Street_2') ?? ""
+    const street3 = watch('Street_3') ?? ""
+    const street4 = watch('Street_4') ?? ""
+    const city = watch('City')
+    const state = watch('State')
+    const zip = watch('Zip')
+    // const props: AddressValidationProps = {
+    //   city: city,
+    //   state: state,
+    //   zip: zip,
+    //   addressLine: [street1, street2, street3, street4]
+    // }
+    
+    // const validationResult = await validateAddress(props)
+    // if ("addressComplete" in validationResult['result']['verdict']) {
+    //   setAddressIsValid(true)
+    // } else {
+    //   setAddressIsValid(false)
+    // }
+    // console.log(validationResult)
+    
+    // console.log(validationMsg)
+    if (isValid) {
+      try {
+        const validationMsg = await axios.post(`${rootUrl}/api/v1/validateAddress`, {
+          "city": city,
+          "state": state,
+          "zip": zip,
+          "addressLine": [street1, street2, street3, street4]
+        })
+        
+        if (validationMsg.status === 200) {
+          console.log("Address Validation API is OK");
+          if (validationMsg.data && validationMsg.data.result && validationMsg.data.result.verdict && validationMsg.data.result.verdict.addressComplete) {
+            console.log("addressComplete attribute is present.");
+            // const response = await axios.post(`${rootUrl}/api/v1/latlng`, {
+            //   "city": city,
+            //   "state": state,
+            //   "zip": zip,
+            //   "addressLine": [street1, street2, street3, street4]
+            // })
+            // console.log(response)
+            // setAddressIsValid(true)
+            setStep((prevStep) => prevStep + 1);
+            window.scrollTo(0, 0);
+          } else {
+            console.log("addressComplete attribute is NOT present.");
+            alert("Address is not valid, double check your input")
+          }
+        } else {
+          console.log("Address Validation API is NOT OK");
+          alert("Error. Address validation API call failed with error code 4xx")
+        }
+        // if (addressIsValid) {
+        //   setStep((prevStep) => prevStep + 1);
+        //   window.scrollTo(0, 0);
+        // } else {
+        //   alert("Address is not valid, double check your input")
+        // }
+      } catch (error) {
+        alert(`Error. Address validation API call failed with error ${error}`)
+      }
     }
   };
 
@@ -265,7 +323,7 @@ export default function Form() {
 
           <div className="nav-buttons">
             <button className='form-button back' type="button" onClick={back}>Back</button>
-            <button className='form-button next' type="button" onClick={nextPage}>Next</button>
+            <button className='form-button next' type="button" onClick={addressValidation}>Next</button>
           </div>
         </div>
       )}
