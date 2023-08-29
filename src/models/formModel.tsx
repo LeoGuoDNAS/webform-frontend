@@ -1,21 +1,21 @@
 enum YesOrNo {
-    EMPTY = "-",
+    // EMPTY = "-",
     YES = "Yes",
     NO = "No"
 }
 
-enum EquipmentType {
+export enum EquipmentType {
     REFRIGERATION = "Refrigeration",
     HVAC = "HVAC",
     KITCHEN = "Kitchen",
     PLUMBING = "Plumbing"
 }
 
-enum PreferredTime {
-    TIME_6_9 = "6-9",
-    TIME_9_12 = "9-12",
-    TIME_12_2_30 = "12-2:30"
-}
+// enum PreferredTime {
+//     TIME_6_9 = "6-9",
+//     TIME_9_12 = "9-12",
+//     TIME_12_2_30 = "12-2:30"
+// }
 
 export interface FormModel {
     'Street_1': string;
@@ -43,7 +43,9 @@ export interface FormModel {
     'Type': EquipmentType;
     'Description': string
     'Preferred_Date': string;
-    'Preferred_Time': PreferredTime;
+    // 'Preferred_Time': PreferredTime;
+    'Preferred_Start_Time': string;
+    'Preferred_End_Time': string;
     "OT_Approved" : YesOrNo;
     "Comments": string;
     "Images": FileList | null;
@@ -55,3 +57,23 @@ export interface AddressValidationProps {
     zip: string
     addressLine: string[]
 }
+
+export const kitchen = new Set<string>([
+    "1-KITCHEN SERVICE",
+    "1Kitchen Service",
+    "Kitchen Service"
+])
+
+export const hvac = new Set<string>([
+    "HVAC Service"
+])
+
+export const ref = new Set<string>([
+    "REFRIGERATIOIN SERVICE",
+    "Refrigeration Service"
+])
+
+export const plumb = new Set<string>([
+    "PLUMB SERVICE",
+    "Plumbing Service"
+])
