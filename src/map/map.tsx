@@ -29,18 +29,15 @@ export const MapComponent: React.FC<{ latitude: number, longitude: number }> = (
     // }
 
     return (
-        <div style={{ height: '25em', width: '100%', marginTop: '50px' }}>
+        <div style={{ height: '25em', width: '100%' }}>
             <GoogleMapReact
                 bootstrapURLKeys={{ key: process.env.REACT_APP_GCP_MAPS_KEY! }}
                 center ={center}
                 defaultZoom={zoom}
                 options={{
                     panControl: false,
-                    // zoomControl: false,
                     mapTypeControl: false,
                     fullscreenControl: false,
-                    // maxZoom: zoom,
-                    // minZoom: zoom,
                     "gestureHandling": 'greedy',
                     scrollwheel: false,
                     draggable: false

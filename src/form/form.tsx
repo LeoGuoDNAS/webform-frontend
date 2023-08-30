@@ -11,7 +11,8 @@ import MapComponent from '../map/map'
 export default function Form() {
   const levenshtein = require('fast-levenshtein');
   // TODO: Replace with frontend URL
-  const rootUrl = "http://localhost:8000" // replace with deployed URL in production
+  const rootUrl = "http://localhost:8000"
+  // const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
   // TODO: Default value is 0
@@ -30,34 +31,55 @@ export default function Form() {
   const state = watch('State');
   const zip = watch('Zip');
 
-  useEffect(() => {
-    async function getLatLng() {
-      if (street1 !== "" && city !== "" && state !== "" && zip !== "") {
-        await axios.post(`${rootUrl}/api/v1/latlng`, {
-          "city": city,
-          "state": state,
-          "zip": zip,
-          "addressLine": [street1]
+  async function getLatLng() {
+    if (street1 !== "" && city !== "" && state !== "" && zip !== "") {
+      await axios.post(`${rootUrl}/api/v1/latlng`, {
+        "city": city,
+        "state": state,
+        "zip": zip,
+        "addressLine": [street1]
+      })
+        .then(response => {
+          // console.log(response.data[0])
+          setLat(response.data[0])
+          setLng(response.data[1])
         })
-          .then(response => {
-            // console.log(response.data[0])
-            setLat(response.data[0])
-            setLng(response.data[1])
-          })
-          .catch(error => {
-            console.log("Error rendering your location", error)
-          })
-      }
+        .catch(error => {
+          console.log("Error rendering your location", error)
+        })
     }
-    getLatLng()
-  }, [street1, city, state, zip])
+  }
+
+  // useEffect(() => {
+  //   async function getLatLng() {
+  //     if (street1 !== "" && city !== "" && state !== "" && zip !== "") {
+  //       await axios.post(`${rootUrl}/api/v1/latlng`, {
+  //         "city": city,
+  //         "state": state,
+  //         "zip": zip,
+  //         "addressLine": [street1]
+  //       })
+  //         .then(response => {
+  //           // console.log(response.data[0])
+  //           setLat(response.data[0])
+  //           setLng(response.data[1])
+  //         })
+  //         .catch(error => {
+  //           console.log("Error rendering your location", error)
+  //         })
+  //     }
+  //   }
+  //   getLatLng()
+  // }, [street1, city, state, zip])
   
   const onSubmit = async (data: FormModel) => {
     // useEffect(() => {<MapComponent latitude={lat} longitude={lng} />}, [watch('Street_1'), watch('City'), watch('State'), watch('Zip')])
     
     // Validate
+    
     const isValid = await trigger(); // trigger validation
     if (isValid) {
+      setLoading(true)
       console.log("Form data:")
       console.log(data)
 
@@ -73,79 +95,6 @@ export default function Form() {
         }
       }
       
-      /*
-      await axios.get(`${rootUrl}/api/v1/clientAddressByZip/${data.Zip}`)
-        .then(async response => {
-          console.log("ClientAddressByZip: ")
-          const sites = response.data
-          console.log(sites)
-          for (let i = 0; i < sites.length; i++) {
-            // console.log(sites[i]['clntsteeqpmnt_nme'])
-            // console.log(watch("Type"))
-            var site = sites[i]
-            if (watch("Type") === EquipmentType.HVAC) {
-              console.log("HVAC")
-              let isAmatch = false
-              
-              if (hvac.has(sites[i]['clntsteeqpmnt_nme'])) {
-              if (levenshtein.get(
-                sites[i]['clntste_addrss_shp_addrss_strt'].toLowerCase().trim(), 
-                watch("Street_1").toLowerCase().trim()) <= 10) {
-                  if (levenshtein.get(
-                    sites[i]['clntste_addrss_shp_addrss_cty'].toLowerCase().trim(), 
-                    watch("City").toLowerCase().trim()) <= 10) {
-                      if (levenshtein.get(
-                        sites[i]['clntste_addrss_shp_addrss_stte'].toLowerCase().trim(), 
-                        watch("State").toLowerCase().trim()) <= 1) {
-                          await axios.post(`${rootUrl}/api/v1/validateAddress`, {
-                            "city": watch("City"),
-                            "state": watch("State"),
-                            "zip": watch("Zip"),
-                            "addressLine": [watch("Street_1")]
-                          })
-                            .then(response => {
-                              var siteLng = response.data.result.geocode.location.longitude
-                              var siteLat = response.data.result.geocode.location.latitude
-                              const dist = haversineDistance([lat, lng], [siteLat, siteLng])
-                              if (dist === null) {
-                                console.log("There was an error determining client site")
-                              } else {
-                                if (dist <= 1) {
-                                  console.log("Match!")
-                                  isAmatch = true
-                                }
-                              }
-                              console.log(dist)
-                            })
-                            .catch(error => {
-                              console.log("There was an error getting site longitude and latitude. ", error)
-                            })
-                      }
-                  }
-                }
-              }
-              if (isAmatch) {
-                console.log(site)
-              } else {
-                // console.log("Not a match")
-              }
-            } else if (watch("Type") === EquipmentType.REFRIGERATION) {
-              console.log("REF")
-              // console.log(ref.has(sites[i]['clntsteeqpmnt_nme']))
-            } else if (watch("Type") === EquipmentType.KITCHEN) {
-              console.log("ALS")
-              // console.log(kitchen.has(sites[i]['clntsteeqpmnt_nme']))
-            } else { // plumbing
-              console.log("PLU")
-              // console.log(plumb.has(sites[i]['clntsteeqpmnt_nme']))
-            }
-          }
-        })
-        .catch(error => {
-          console.log("There was an error fetching client address by zip!", error);
-        })
-      */
-
       await axios.post(`${rootUrl}/api/v1/submit`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -154,17 +103,19 @@ export default function Form() {
         .then(response => {
           console.log("Response data:")
           console.log(response.data)
+          console.log(response.data['Submission Msg'])
         })
         .catch(error => {
           console.log("There was an error!", error);
         })
 
       // TODO: uncomment these two lines for production
-      // setSubmitted(true);
-      // reset();
+      setSubmitted(true);
+      reset();
       // setAddressIsValid(false);
       // setLat(undefined);
       // setLng(undefined);
+      setLoading(false)
     }
   };
 
@@ -236,7 +187,7 @@ export default function Form() {
             console.log("addressComplete attribute is NOT present.")
             alert("Address is NOT validated. Here's your formatted address" +
             `\n\n${validationMsg.data.result.address.formattedAddress}\n\n` + 
-            "If you think this is the correct address, please proceed. Otherwise, go back and change your address.")
+            "If you believe this is the correct address, please dismiss this message and proceed. Otherwise, go back and change your address.")
           }
           setStep((prevStep) => prevStep + 1);
           window.scrollTo(0, 0);
@@ -367,6 +318,7 @@ export default function Form() {
         {step === -2 && (
           <div className='form-section'>
             <h3 className='subTitle'>Please download DNAS Connect to proceed, this web form is for non-contract customers only.</h3>
+            <img className='dnas-app-logo' src={process.env.PUBLIC_URL + '/img/dnas-connect-logo.png'} alt='DNAS Connect app icon'/>
             <p>"DNAS Connect" is available for download for both iOS and Android devices</p>
             <div className='qr-codes'>
               <div className='qr-code-container'>
@@ -466,7 +418,11 @@ export default function Form() {
                 "addressLine": [watch('Street_1')]
               })
             } */}
+            <p>Address Preview</p>
             <MapComponent latitude={lat} longitude={lng} />
+            <div className="nav-buttons">
+              <button className='form-button viewAddress' type="button" onClick={getLatLng}>View your address in map</button>
+            </div>
             
             <div className="nav-buttons">
               <button className='form-button back' type="button" onClick={back}>Back</button>

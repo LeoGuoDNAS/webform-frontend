@@ -120,6 +120,10 @@
                 font-weight: 500;
             }
 
+            .dnas-app-logo {
+                width: 120px;
+            }
+
             .qr-codes {
                 display: flex;
                 flex-direction: row;
@@ -185,6 +189,11 @@
 
                 .back {
                     background-color: #D05400;
+                }
+
+                .viewAddress {
+                    width: 100%;
+                    background-color: black;
                 }
 
                 .backToHome {
