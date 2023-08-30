@@ -31,23 +31,22 @@ export const MapComponent: React.FC<{ latitude: number, longitude: number }> = (
     return (
         <div style={{ height: '25em', width: '100%', marginTop: '50px' }}>
             <GoogleMapReact
-                bootstrapURLKeys={{ key: process.env.REACT_APP_GCP_MAPS_KEY!! }}
+                bootstrapURLKeys={{ key: process.env.REACT_APP_GCP_MAPS_KEY! }}
                 center ={center}
                 defaultZoom={zoom}
-                // onGoogleApiLoaded={({map, maps}) => renderMarkers(map, maps, center)}
                 options={{
-                    panControl: true,
-                    zoomControl: false,
+                    panControl: false,
+                    // zoomControl: false,
                     mapTypeControl: false,
-                    fullscreenControl: false
-                    // draggable: false
+                    fullscreenControl: false,
+                    // maxZoom: zoom,
+                    // minZoom: zoom,
+                    "gestureHandling": 'greedy',
+                    scrollwheel: false,
+                    draggable: false
                 }}
-            // }
             >
-                {/* <div lat={center.lat} lng={center.lng} >
-                    <i className="fa-solid fa-location-dot fa-fade fa-xl" style={{color: "#d05400"}}></i>
-                </div> */}
-                <Pin lat={center.lat} lng={center.lng} />
+                <Pin lat={latitude} lng={longitude} />
             </GoogleMapReact>
         </div>
     );
