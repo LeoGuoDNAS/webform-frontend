@@ -11,8 +11,8 @@ import MapComponent from '../map/map'
 export default function Form() {
   const levenshtein = require('fast-levenshtein');
   // TODO: Replace with frontend URL
-  const rootUrl = "http://localhost:8000"
-  // const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
+  // const rootUrl = "http://localhost:8000"
+  const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
   // TODO: Default value is 0
