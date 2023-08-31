@@ -345,7 +345,7 @@ export default function Form() {
 
         {step === 0 && (
           <div className='form-section'>
-            <img src={process.env.PUBLIC_URL + '/img/dnas-logo.png'} alt='DNAS Logo' />
+            {/* <img src={process.env.PUBLIC_URL + '/img/dnas-logo.png'} alt='DNAS Logo' /> */}
             <h1 className='title'>Welcome to DNAS Non-Contract Customer Service Request Form</h1>
             <h3 className='subTitle'>Day & Nite / All Service / Popular Plumbing</h3>
             <h4 className='subTitle'>Visit our website to learn more about us <a href="https://www.wearetheone.com">www.wearetheone.com</a></h4>
