@@ -110,11 +110,11 @@ export default function Form() {
         })
 
       // TODO: uncomment these two lines for production
-      setSubmitted(true);
-      reset();
-      // setAddressIsValid(false);
-      // setLat(undefined);
-      // setLng(undefined);
+      // setSubmitted(true);
+      // reset();
+      // // setAddressIsValid(false);
+      // // setLat(undefined);
+      // // setLng(undefined);
       setLoading(false)
     }
   };
@@ -539,7 +539,8 @@ export default function Form() {
             <textarea className="input textarea" {...register("Description", {required: true})} />
             {errors['Description'] && errors['Description'].type === 'required' && <p style={{ color: 'red' }}>Description of Problem is required.</p>}
             
-            <p>Upload Images</p>
+            {/* TODO Image uploader */}
+            {/* <p>Upload Images</p>
             
             <Controller
               name="Images"
@@ -548,7 +549,7 @@ export default function Form() {
               render={({ field }) => (
                 <ImageUploader onChange={field.onChange} value={field.value} />
               )}
-            />
+            /> */}
 
             <div className="nav-buttons">
               <button className='form-button back' type="button" onClick={back}>Back</button>
