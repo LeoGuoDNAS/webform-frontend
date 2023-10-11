@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Controller, set } from 'react-hook-form';
 import "./form.css";
 import axios from 'axios';
-import {FormModel, AddressValidationProps, kitchen, ref, plumb, hvac, EquipmentType} from '../models/formModel';
+import {FormModel, AddressValidationProps, kitchen, ref, plumb, hvac} from '../models/formModel';
 import MapComponent from '../map/map'
 // import {validateAddress, AddressValidationProps} from '../validation/validation';
 // import {haversineDistance} from '../geocoding/geocoding'
 // require('dotenv').config();
 
 export default function Form() {
-  const levenshtein = require('fast-levenshtein');
+  // const levenshtein = require('fast-levenshtein');
   // TODO: Replace with frontend URL
   // const rootUrl = "http://localhost:8000"
+  //const rootUrl = "https://b9e7-74-101-57-2.ngrok-free.app"
   const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
@@ -19,8 +20,11 @@ export default function Form() {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [requirePO, setRequirePO] = useState(false);
+  
+  const [searchTerm, setSearchTerm] = useState('');
 
-
+  const [possibleSites, setPossibleSites] = useState([]);
+  const [possibleSiteEquipments, setPossibleSiteEquipments] = useState<{ [key: string]: any }[]>([]);
   const [lat, setLat] = useState(40.728331390509545);
   const [lng, setLng] = useState(-73.69377750670284);
   // const [addressIsValid, setAddressIsValid] = useState(false);
@@ -30,6 +34,7 @@ export default function Form() {
   const city = watch('City');
   const state = watch('State');
   const zip = watch('Zip');
+  
 
   async function getLatLng() {
     if (street1 !== "" && city !== "" && state !== "" && zip !== "") {
@@ -110,13 +115,25 @@ export default function Form() {
         })
 
       // TODO: uncomment these two lines for production
-      // setSubmitted(true);
-      // reset();
-      // // setAddressIsValid(false);
-      // // setLat(undefined);
-      // // setLng(undefined);
+      setSubmitted(true);
+      reset();
+
+      // setAddressIsValid(false);
+      // setLat(undefined);
+      // setLng(undefined);
       setLoading(false)
     }
+  };
+
+  const [selectedEquipment, setSelectedEquipment] = useState<string | null>(null);
+
+  const handleEquipmentClick = (equipment: {[key: string]: any}) => {
+    setSelectedEquipment(equipment['clntsteeqpmnt_rn']);
+    setValue("Equipment_ID", equipment['clntsteeqpmnt_id']);
+    setValue("Equipment_RN", equipment['clntsteeqpmnt_rn']);
+    setValue("Equipment_Name", equipment['clntsteeqpmnt_nme']);
+    setValue("Site_ID", equipment['clntste_id']);
+    setValue("Site_RN", equipment['clntste_rn']);
   };
 
   const addressValidation = async () => {
@@ -159,22 +176,12 @@ export default function Form() {
               setValue("City", addressArray[2].componentName.text)
               setValue("State", addressArray[3].componentName.text)
               setValue("Zip", addressArray[4].componentName.text)
-              
-              // coords = await axios.post(`${rootUrl}/api/v1/latlng`, {
-              //   "city": addressArray[2].componentName.text,
-              //   "state": addressArray[3].componentName.text,
-              //   "zip": addressArray[4].componentName.text,
-              //   "addressLine": [addressArray[0].componentName.text + " " + addressArray[1].componentName.text, addressArray[2].componentName.text]
-              // })
             }
 
             console.log("addressComplete attribute is present.")
-            // setLat(validationMsg.data.result.geocode.location.latitude)
-            // setLng(validationMsg.data.result.geocode.location.longitude)
-            // console.log(validationMsg.data.result.geocode.location.latitude)
-            // console.log(validationMsg.data.result.geocode.location.longitude)
             
-            alert("Address validated, here's your formatted address:" +
+            
+            alert("Address is complete and validated, here's your formatted address:" +
             `\n\n${validationMsg.data.result.address.formattedAddress}\n\n` +
             "If you think this is incorrect, please go back to change your address."
             // + `\nYour coordinate is: ${}`
@@ -185,7 +192,21 @@ export default function Form() {
             // setLoading(false)
             console.log(validationMsg.data.result)
             console.log("addressComplete attribute is NOT present.")
-            alert("Address is NOT validated. Here's your formatted address" +
+
+            const addressArray = validationMsg.data.result.address.addressComponents;
+            setValue("Street_1", addressArray[0].componentName.text + " " + addressArray[1].componentName.text)
+            if (addressArray.length > 7) {
+              setValue("Street_2", addressArray[2].componentName.text)
+              setValue("City", addressArray[3].componentName.text)
+              setValue("State", addressArray[4].componentName.text)
+              setValue("Zip", addressArray[5].componentName.text)
+            } else { // == 7
+              setValue("City", addressArray[2].componentName.text)
+              setValue("State", addressArray[3].componentName.text)
+              setValue("Zip", addressArray[4].componentName.text)
+            }
+
+            alert("The address is NOT complete, but it may still be valid. Here's your formatted address" +
             `\n\n${validationMsg.data.result.address.formattedAddress}\n\n` + 
             "If you believe this is the correct address, please dismiss this message and proceed. Otherwise, go back and change your address.")
           }
@@ -234,6 +255,126 @@ export default function Form() {
     setSubmitted(false)
     setRequirePO(false)
     setSelectedFiles(null)
+  };
+
+  const getSiteInfo = async () => {
+    const isValid = await trigger();
+    if (isValid) {
+      setLoading(true)
+      setStep((prevStep) => prevStep + 1);
+      window.scrollTo(0, 0);
+      var rawEmails = watch('Business_Emails').split(",")
+      var emails = rawEmails.map(email => email.trim().toLowerCase())
+
+      var rawPhones = watch('Business_Phone_Numbers').split(",")
+      var phones = rawPhones.map(phone => phone.trim().toLowerCase())
+
+      await axios.post(`${rootUrl}/api/v1/getSiteInfo/`, {
+        "businessName": watch('Business_Name'),
+        "street1": watch('Street_1'),
+        "city": watch('City'),
+        "state": watch('State'),
+        "zip": watch('Zip'),
+        "email": watch('Email_Address'),
+        "phone": watch('Phone_Number'),
+        "emails": emails,
+        "phoneNumbers": phones
+      })
+        .then(async response => {
+          // setLoading(false)
+          console.log("Site Info")
+          console.log(response.data)
+          // if (response.data.length === 1) {
+          //   // only one match
+          //   // best scenario
+          //   // display info
+          //   setPossibleSites(response.data)
+          //   setLoading(false)
+          // } else {
+          //   //setStep((prevStep) => prevStep + 1);
+          //   setLoading(false)
+          // }
+          setPossibleSites(response.data)
+          // console.log(possibleSites.length)
+
+          if (response.data.length === 0) {
+            await axios.get(`${rootUrl}/api/v1/clientAddressPlaceholder/`)
+              .then(clientSites => {
+                var siteEquipments: { [key: string]: any }[] = [];
+                for (var j = 0; j < clientSites.data.length; j++) {
+                  siteEquipments = siteEquipments.concat(clientSites.data[j])
+                }
+                console.log("Site Equipment Info")
+                setPossibleSiteEquipments(siteEquipments)
+                console.log(siteEquipments)
+                setLoading(false)
+              })
+              .catch(error => {
+                console.log("There was an error!", error);
+                setLoading(false)
+              })
+          } else {
+            await axios.get(`${rootUrl}/api/v1/clientAddressByZip/${watch('Zip').trim().toLowerCase()}`)
+              .then(clientSites => {
+                var siteEquipments: { [key: string]: any }[] = [];
+                for (var i = 0; i < response.data.length; i++) {
+                  for (var j = 0; j < clientSites.data.length; j++) {
+                    if (response.data[i]['clntste_rn'] === clientSites.data[j]['clntste_rn'] && (response.data[i]['clntste_rn'] !== "350161652" || response.data[i]['clntste_rn'] !== 350161652)) {
+                      // console.log(response.data[i]['clntste_rn'])
+                      siteEquipments = siteEquipments.concat(clientSites.data[j])
+                      // setPossibleSiteEquipments(possibleSiteEquipments.concat(clientSites.data[j]))
+                    }
+                  }
+                }
+                console.log("Site Equipment Info")
+                setPossibleSiteEquipments(siteEquipments)
+                console.log(siteEquipments)
+                setLoading(false)
+              })
+              .catch(error => {
+                console.log("There was an error!", error);
+                setLoading(false)
+              })
+          }
+        })
+      .catch(error => {
+        console.log("There was an error!", error);
+        setLoading(false)
+      })
+    }
+    // setLoading(true)
+    
+    // await axios.post(`${rootUrl}/api/v1/getSiteInfo/`, {
+    //   "businessName": watch('Business_Name'),
+    //   "street1": watch('Street_1'),
+    //   "city": watch('City'),
+    //   "state": watch('State'),
+    //   "zip": watch('Zip'),
+    //   "email": watch('Email_Address'),
+    //   "phone": watch('Phone_Number'),
+    // })
+    //   .then(response => {
+    //     // setLoading(false)
+    //     console.log("Site Info")
+    //     console.log(response.data)
+    //     // if (response.data.length === 1) {
+    //     //   // only one match
+    //     //   // best scenario
+    //     //   // display info
+    //     //   setPossibleSites(response.data)
+    //     //   setLoading(false)
+    //     // } else {
+    //     //   //setStep((prevStep) => prevStep + 1);
+    //     //   setLoading(false)
+    //     // }
+    //     setPossibleSites(response.data)
+    //     setLoading(false)
+    //   })
+    //   .catch(error => {
+    //     console.log("There was an error!", error);
+    //     setLoading(false)
+    //   })
+
   };
 
   const isResidential = async () => {
@@ -308,7 +449,7 @@ export default function Form() {
           : <>
         {step === -1 && (
           <div className='form-section'>
-            <h3 className='subTitle'>We are sorry we could not assist you. We only provide service to commercial locations. If you are a commercial location, click the button to go back.</h3>
+            <h3 className='subTitle'>We are sorry we could not assist you. We only provide service to commercial locations. If you are a commercial customer, click the button to go back.</h3>
             <div className="nav-buttons">
               <button className='form-button back' type="button" onClick={home}>Back</button>
             </div>
@@ -324,7 +465,7 @@ export default function Form() {
               <div className='qr-code-container'>
                 <img className='qr-code' src={process.env.PUBLIC_URL + '/img/dnas-connect-apple.png'} alt='app store qr code'/>
                 <p><i className="fa-brands fa-app-store-ios"></i>   App Store</p>
-                <a className='app-store-button' href='https://apps.apple.com/us/app/dnas-lite/id1531944898'>
+                <a className='app-store-button' href='https://apps.apple.com/us/app/dnas-lite/id1531944898' target='_blank' rel='noopener noreferrer'>
                 <i className="fa-brands fa-apple"></i>   Get it on App Store
                 </a>
               </div>
@@ -332,7 +473,7 @@ export default function Form() {
               <div className='qr-code-container'>
                 <img className='qr-code' src={process.env.PUBLIC_URL + '/img/dnas-connect-google.png'} alt='play store qr code'/>
                 <p><i className="fa-brands fa-google-play"></i>   Google Play</p>
-                <a className='app-store-button' href='https://play.google.com/store/apps/details?id=com.dayniteit.dnaslite&pcampaignid=web_share'>
+                <a className='app-store-button' href='https://play.google.com/store/apps/details?id=com.dayniteit.dnaslite&pcampaignid=web_share' target='_blank' rel='noopener noreferrer'>
                 <i className="fa-brands fa-google-play"></i>   Get it on Google Play
                 </a>
               </div>
@@ -370,7 +511,11 @@ export default function Form() {
 
         {step === 2 && (
           <div className='form-section'>
-            <h1 className='title'>Site Address</h1>
+            <h1 className='title'>Site Info</h1>
+            <p>Business Name <span className='required'>*</span></p>
+            <input className="input text" type="text" placeholder="Business Name" {...register("Business_Name", { required: true })} />
+            {errors['Business_Name'] && errors['Business_Name'].type === 'required' && <p style={{ color: 'red' }}>Business Name is required.</p>}
+
             <p>Street 1 <span className='required'>*</span></p>
             <input className="input text" type="text" placeholder="Street 1" {...register("Street_1", { required: true })} />
             {errors['Street_1'] && errors['Street_1'].type === 'required' && <p style={{ color: 'red' }}>Street 1 is required.</p>}
@@ -433,7 +578,7 @@ export default function Form() {
 
         {step === 3 && (
           <div className='form-section'>
-            <h1 className='title'>Contact Person Details</h1>
+            <h1 className='title'>Contact Info</h1>
             <p>First Name <span className='required'>*</span></p>
             <input className="input text" type="text" placeholder="First Name" {...register("First_Name", {required: true})} />
             {errors['First_Name'] && errors['First_Name'].type === 'required' && <p style={{ color: 'red' }}>First Name is required.</p>}
@@ -458,14 +603,82 @@ export default function Form() {
             <p>Alternative Phone Number Ext.</p>
             <input className="input number" type="number" placeholder="Ext" {...register("Alternative_Phone_Number_Ext", {})} />
             
+            <h3 className="subTitle">Business Contact Info</h3>
+            <h4>These are used for the aglorithm to match your info to our database records. Please provide the best response for the best result.</h4>
+            <p>Business Email Addresses (Please provide a list of email address(es) under your company's email domain) <span className='required'>*</span></p>
+            <p>Seperate by comma (,)</p>
+            <input className="input text" type="text" placeholder="Business Emails" {...register("Business_Emails", {required: true})} />
+            {errors['Business_Emails'] && errors['Business_Emails'].type === 'required' && <p style={{ color: 'red' }}>Business Emails is required.</p>}
+
+            <p>Business Phone Numbers (Please provide a list phone number(s) that was used to contact DNAS before) <span className='required'>*</span></p>
+            <p>Seperate by comma (,)</p>
+            <input className="input text" type="text" placeholder="Business Phone Numbers" {...register("Business_Phone_Numbers", {required: true})} />
+            {errors['Business_Phone_Numbers'] && errors['Business_Phone_Numbers'].type === 'required' && <p style={{ color: 'red' }}>Business Phone Numbers is required.</p>}
+
             <div className="nav-buttons">
               <button className='form-button back' type="button" onClick={back}>Back</button>
-              <button className='form-button next' type="button" onClick={nextPage}>Next</button>
+              <button className='form-button next' type="button" onClick={getSiteInfo}>Next</button>
             </div>
           </div>
         )}
 
         {step === 4 && (
+          <div className='form-section'>
+            <h1 className='title'>Confirm your site info</h1>
+
+            <h2 className='subTitle'>Matching Sites</h2>
+            <p>Based on information your provided, here are the possible sites from our database that match your information.</p>
+            <div className="tips">
+              <h4>Returning customers</h4>
+              <p>You should see your site information displayed below. You might see more than one site due to how we structure our database. 
+                If you see your site listed in the possible matches, please click 'Confirm Site' to proceed. Otherwise, please click 'Go back' and correct your information.</p>
+              <h4>New customers</h4>
+              <p>Please click 'Confirm Site' and one of our agents will reach out to confirm your request later.</p>
+            </div>
+            <div className="site-info-wrapper">
+              {
+                possibleSites &&
+                  possibleSites.map((site, index) => (
+                    <div className="site-info">
+                      <div key={index} className="site">
+                        <h4>Business Name</h4>
+                        <p>{site['clntste_nme']}</p>
+                        <h4>Site Address</h4>
+                        <p>{site['clntste_addrss_shp_addrss_strt']}</p>
+                        <p>{site['clntste_addrss_shp_addrss_cty']}, {site['clntste_addrss_shp_addrss_stte']} {site['clntste_addrss_shp_addrss_zp']}</p>
+                      </div>
+                    </div>
+                  )
+                )
+              }
+
+              {
+                (!possibleSites || possibleSites.length === 0) &&
+                  <div className="site-info">
+                    <h4>No customer site from our database matches your information.</h4>
+                    <p>If you are a returning customer, please go back and correct your information. If you are a new customer, gracefully ignore this message and proceed to the next step.</p>
+                  </div>
+
+              }
+            </div>
+
+
+            <div className="tips">
+              <h4><i className="fa-solid fa-circle-info" style={{"color": "#000000"}}></i> Tips for getting the right site</h4>
+              <p>Make sure your business name and site address are correct. 
+                Pay attention to your business emails' domain addresses (ensure your are using the correct work email address). 
+                For business phone numbers, make sure you are using the numbers that you used to contact with DNAS.
+              </p>
+            </div>
+            
+            <div className="nav-buttons">
+              <button className='form-button back' type="button" onClick={back}>Go back</button>
+              <button className='form-button next' type="button" onClick={nextPage}>Confirm Site</button>
+            </div>
+          </div>
+        )}
+
+        {step === 5 && (
           <div className='form-section'>
             <h1 className='title'>Equipment Information</h1>
             <p>Manufacturer</p>
@@ -510,6 +723,81 @@ export default function Form() {
             <input className="input text" type="text" placeholder="Purchase Order Number" {...register("Purchase_Order_Number", {required: requirePO})} />
             {errors['Purchase_Order_Number'] && errors['Purchase_Order_Number'].type === 'required' && <p style={{ color: 'red' }}>Purchase Order Number is required.</p>}
 
+            
+            <p>Exact Location (Instructions of access) <span className='required'>*</span></p>
+            <input className="input text" type="text" placeholder="Location" {...register("Location", {required: true})} />
+            {errors['Location'] && errors['Location'].type === 'required' && <p style={{ color: 'red' }}>Exact Location (Instructions of access) is required.</p>}
+
+
+            <p>Equipment (Choose one from the list) <span className='required'>*</span></p>
+            {/* <select className="select" {...register("Type", { required: true })}>
+              <option value="" disabled selected hidden>Select an option...</option>
+              <option value="Refrigeration">Refrigeration</option>
+              <option value="HVAC">HVAC</option>
+              <option value="Kitchen">Kitchen</option>
+              <option value="Plumbing">Plumbing</option>
+            </select> */}
+            <div className="tips">
+              <i className="fa-solid fa-circle-info" style={{"color": "#000000"}}></i><p>If you don't see any equipment below, please reach out to <a href='mailto:clientconcierge@wearetheone.com'>clientconcierge@wearetheone.com</a></p>
+            </div>
+            <input type="hidden" {...register("Equipment_RN", { required: true })}/>
+            <input type="hidden" {...register("Equipment_Name", { required: true })}/>
+            <input type="hidden" {...register("Equipment_ID", { required: true })}/>
+            <input type="hidden" {...register("Site_ID", { required: true })}/>
+            <input type="hidden" {...register("Site_RN", { required: true })}/>
+
+            {/* <select className="select" {...register("Type", { required: true })}>
+              <option value="" disabled selected hidden>Select an option...</option>
+              {possibleSiteEquipments.map((siteEquipment) => (
+                  <option value={siteEquipment['clntsteeqpmnt_rn']}>{siteEquipment['clntste_nme']} - {siteEquipment['clntsteeqpmnt_nme']} | {siteEquipment['clntsteeqpmnt_id']}</option>
+              ))}
+            </select> */}
+            <div className="equipment-list-wrapper">
+              <input
+                className="input text"
+                type="text"
+                placeholder="Search / filter this list (based on address, name, manufacturer, or model)"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{"marginBottom": "1em"}} 
+              />
+              <ul className="equipment-list">
+                  {possibleSiteEquipments
+                    .filter(siteEquipment => 
+                      siteEquipment['clntste_nme'].toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      siteEquipment['clntsteeqpmnt_nme'].toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      siteEquipment['clntsteeqpmnt_mnfctrr'].toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      siteEquipment['clntsteeqpmnt_mnfctrr_mdl'].toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                    .map((siteEquipment) => (
+                      <li 
+                          key={siteEquipment['clntsteeqpmnt_rn']} 
+                          onClick={() => handleEquipmentClick(siteEquipment)}
+                          className={selectedEquipment === siteEquipment['clntsteeqpmnt_rn'] ? 'selected' : ''}
+                      >
+                        <div className="equipment-list-li-content">
+                          <div>
+                            {siteEquipment['clntste_nme']}
+                            
+                            <p>
+                              <b>Name</b>&nbsp;&nbsp;{siteEquipment['clntsteeqpmnt_nme']}&nbsp;&nbsp;
+                              <b>Manufacturer</b>&nbsp;&nbsp;{siteEquipment['clntsteeqpmnt_mnfctrr'] ? siteEquipment['clntsteeqpmnt_mnfctrr'] : "n/a"}&nbsp;&nbsp;
+                              <b>Model</b>&nbsp;&nbsp;{siteEquipment['clntsteeqpmnt_mnfctrr_mdl'] ? siteEquipment['clntsteeqpmnt_mnfctrr_mdl'] : "n/a"}
+                            </p>
+                          </div>
+                          <i className="equipment-list-li-content-check fa-solid fa-circle-check" style={{"color": "#ffffff"}}></i>
+                        </div>
+                      </li>
+                  ))}
+              </ul>
+            </div>
+            {errors['Equipment_RN'] && errors['Equipment_RN'].type === 'required' && <p style={{ color: 'red' }}>Equipment is required.</p>}
+
+            <p>Description of Problem <span className='required'>*</span></p>
+            <textarea className="input textarea" {...register("Description", {required: true})} />
+            {errors['Description'] && errors['Description'].type === 'required' && <p style={{ color: 'red' }}>Description of Problem is required.</p>}
+            
+
             <div className="nav-buttons">
               <button className='form-button back' type="button" onClick={back}>Back</button>
               <button className='form-button next' type="button" onClick={nextPage}>Next</button>
@@ -517,7 +805,7 @@ export default function Form() {
           </div>
         )}
 
-        {step === 5 && (
+        {/* {step === 6 && (
           <div className='form-section'>
             <h1 className='title'>Service Requirements</h1>
             <p>Exact Location (Instructions of access) <span className='required'>*</span></p>
@@ -525,7 +813,7 @@ export default function Form() {
             {errors['Location'] && errors['Location'].type === 'required' && <p style={{ color: 'red' }}>Exact Location (Instructions of access) is required.</p>}
 
 
-            <p>Equipment Type <span className='required'>*</span></p>
+            <p>Equipment (Choose one from the list) <span className='required'>*</span></p>
             <select className="select" {...register("Type", { required: true })}>
               <option value="" disabled selected hidden>Select an option...</option>
               <option value="Refrigeration">Refrigeration</option>
@@ -533,14 +821,21 @@ export default function Form() {
               <option value="Kitchen">Kitchen</option>
               <option value="Plumbing">Plumbing</option>
             </select>
-            {errors['Type'] && errors['Type'].type === 'required' && <p style={{ color: 'red' }}>Equipment Type is required.</p>}
+            <input type="hidden" {...register("Type", { required: true })}/>
+            <select className="select" {...register("Type", { required: true })}>
+              <option value="" disabled selected hidden>Select an option...</option>
+              {possibleSiteEquipments.map((siteEquipment) => (
+                  <option value={siteEquipment['clntsteeqpmnt_rn']}>{siteEquipment['clntste_nme']} - {siteEquipment['clntsteeqpmnt_nme']} | {siteEquipment['clntsteeqpmnt_id']}</option>
+              ))}
+            </select>
+            
+            {errors['Type'] && errors['Type'].type === 'required' && <p style={{ color: 'red' }}>Equipment is required.</p>}
 
             <p>Description of Problem <span className='required'>*</span></p>
             <textarea className="input textarea" {...register("Description", {required: true})} />
             {errors['Description'] && errors['Description'].type === 'required' && <p style={{ color: 'red' }}>Description of Problem is required.</p>}
             
-            {/* TODO Image uploader */}
-            {/* <p>Upload Images</p>
+            <p>Upload Images</p>
             
             <Controller
               name="Images"
@@ -549,14 +844,14 @@ export default function Form() {
               render={({ field }) => (
                 <ImageUploader onChange={field.onChange} value={field.value} />
               )}
-            /> */}
+            />
 
             <div className="nav-buttons">
               <button className='form-button back' type="button" onClick={back}>Back</button>
               <button className='form-button next' type="button" onClick={nextPage}>Next</button>
             </div>
           </div>
-        )}
+        )} */}
 
         {step === 6 && (
           <div className='form-section'>

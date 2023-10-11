@@ -4,12 +4,12 @@ enum YesOrNo {
     NO = "No"
 }
 
-export enum EquipmentType {
-    REFRIGERATION = "Refrigeration",
-    HVAC = "HVAC",
-    KITCHEN = "Kitchen",
-    PLUMBING = "Plumbing"
-}
+// export enum EquipmentType {
+//     REFRIGERATION = "Refrigeration",
+//     HVAC = "HVAC",
+//     KITCHEN = "Kitchen",
+//     PLUMBING = "Plumbing"
+// }
 
 // enum PreferredTime {
 //     TIME_6_9 = "6-9",
@@ -18,6 +18,7 @@ export enum EquipmentType {
 // }
 
 export interface FormModel {
+    'Business_Name': string;
     'Street_1': string;
     'Street_2'?: string;
     'Street_3'?: string;
@@ -40,8 +41,15 @@ export interface FormModel {
     "Require_PO_number" : YesOrNo;
     "Purchase_Order_Number": string;
     'Location': string;
-    'Type': EquipmentType;
-    'Description': string
+    //'Type': EquipmentType;
+    // 'Type': string;
+    'Equipment_RN': string;
+    'Equipment_Name': string;
+    'Equipment_ID': string;
+    'Site_ID': string;
+    'Site_RN': string;
+    
+    'Description': string;
     'Preferred_Date': string;
     // 'Preferred_Time': PreferredTime;
     'Preferred_Start_Time': string;
@@ -49,6 +57,8 @@ export interface FormModel {
     "OT_Approved" : YesOrNo;
     "Comments": string;
     "Images": FileList | null;
+    "Business_Emails": string;
+    "Business_Phone_Numbers": string;
 }
 
 export interface AddressValidationProps {
