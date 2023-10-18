@@ -11,7 +11,7 @@ const Pin = (_props: any) => {
 
 export const MapComponent: React.FC<{ latitude: number, longitude: number }> = ({latitude, longitude}) => {
     const [center, setCenter] = useState({ lat: 40.728331390509545, lng : -73.69377750670284 });
-    const [zoom, setZoom] = useState(16);
+    // const [zoom, setZoom] = useState(16);
 
     useEffect(() => {
         setCenter({
@@ -33,7 +33,7 @@ export const MapComponent: React.FC<{ latitude: number, longitude: number }> = (
             <GoogleMapReact
                 bootstrapURLKeys={{ key: process.env.REACT_APP_GCP_MAPS_KEY! }}
                 center ={center}
-                defaultZoom={zoom}
+                defaultZoom={16}
                 options={{
                     panControl: false,
                     mapTypeControl: false,
