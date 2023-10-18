@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useForm, Controller, set } from 'react-hook-form';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import "./form.css";
 import axios from 'axios';
-import {FormModel, AddressValidationProps, kitchen, ref, plumb, hvac} from '../models/formModel';
+import {FormModel} from '../models/formModel';
 import MapComponent from '../map/map'
 import ReactModal from 'react-modal';
 // import {validateAddress, AddressValidationProps} from '../validation/validation';
@@ -12,10 +12,10 @@ import ReactModal from 'react-modal';
 export default function Form() {
   // const levenshtein = require('fast-levenshtein');
   // TODO: Replace with frontend URL
-  const rootUrl = "http://localhost:8000"
+  // const rootUrl = "http://localhost:8000"
   // const rootUrl = "https://b9e7-74-101-57-2.ngrok-free.app"
-  // const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
-  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
+  // const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
   // TODO: Default value is 0
   const [step, setStep] = useState(0);
@@ -30,7 +30,7 @@ export default function Form() {
   const [lat, setLat] = useState(40.728331390509545);
   const [lng, setLng] = useState(-73.69377750670284);
   // const [addressIsValid, setAddressIsValid] = useState(false);
-  const { register, handleSubmit, formState: { errors }, trigger, reset, control, watch, setValue } = useForm<FormModel>();
+  const { register, handleSubmit, formState: { errors }, trigger, reset, watch, setValue } = useForm<FormModel>();
 
   const street1 = watch('Street_1');
   const city = watch('City');
@@ -265,7 +265,7 @@ export default function Form() {
     setStep(0);
     setSubmitted(false)
     setRequirePO(false)
-    setSelectedFiles(null)
+    // setSelectedFiles(null)
   };
 
   const getSiteInfo = async () => {
@@ -397,48 +397,48 @@ export default function Form() {
     setStep(-2);
   };
 
-  interface ImageUploaderProps {
-    onChange: (files: FileList | null) => void;
-    value?: FileList | null;
-  }
+  // interface ImageUploaderProps {
+  //   onChange: (files: FileList | null) => void;
+  //   value?: FileList | null;
+  // }
 
-  const ImageUploader: React.FC<ImageUploaderProps> = ({ onChange, value }) => {
-    return (
-      <div className="file-upload">
-        <p className="file-upload-info">Select images from your device, up to 5 images</p>
-        <p className="file-upload-info">Currently selected:  <span>{selectedFiles?.length === undefined ? 0 : selectedFiles?.length}</span></p>
+  // const ImageUploader: React.FC<ImageUploaderProps> = ({ onChange, value }) => {
+  //   return (
+  //     <div className="file-upload">
+  //       <p className="file-upload-info">Select images from your device, up to 5 images</p>
+  //       <p className="file-upload-info">Currently selected:  <span>{selectedFiles?.length === undefined ? 0 : selectedFiles?.length}</span></p>
         
-        {value && Array.from(value).map((file, index) => (
-          <img 
-            key={index} 
-            src={URL.createObjectURL(file)} 
-            alt={`Preview ${index}`}
-            className='file-upload-preview' 
-          />
-        ))}
+  //       {value && Array.from(value).map((file, index) => (
+  //         <img 
+  //           key={index} 
+  //           src={URL.createObjectURL(file)} 
+  //           alt={`Preview ${index}`}
+  //           className='file-upload-preview' 
+  //         />
+  //       ))}
         
-        <input
-          id="file-upload"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => {
-            const files = e.target.files;
-            if (files && files.length > 5) {
-              alert('You can select a maximum of 5 images only.');
-              return; 
-            }
-            onChange(files);
-            setSelectedFiles(files);
-          }}
-          className="file-upload-input"
-        />
-        <label htmlFor="file-upload" className="file-upload-label">
-          <i className="fa-solid fa-upload fa-2xl" style={{"color": "#ffffff"}}></i>
-        </label>
-      </div>
-    );
-  };
+  //       <input
+  //         id="file-upload"
+  //         type="file"
+  //         accept="image/*"
+  //         multiple
+  //         onChange={(e) => {
+  //           const files = e.target.files;
+  //           if (files && files.length > 5) {
+  //             alert('You can select a maximum of 5 images only.');
+  //             return; 
+  //           }
+  //           onChange(files);
+  //           setSelectedFiles(files);
+  //         }}
+  //         className="file-upload-input"
+  //       />
+  //       <label htmlFor="file-upload" className="file-upload-label">
+  //         <i className="fa-solid fa-upload fa-2xl" style={{"color": "#ffffff"}}></i>
+  //       </label>
+  //     </div>
+  //   );
+  // };
 
   return (
     <form className="form" onSubmit={handleSubmit(onSubmit)}>
