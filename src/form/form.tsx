@@ -4,6 +4,7 @@ import "./form.css";
 import axios from 'axios';
 import {FormModel, AddressValidationProps, kitchen, ref, plumb, hvac} from '../models/formModel';
 import MapComponent from '../map/map'
+import ReactModal from 'react-modal';
 // import {validateAddress, AddressValidationProps} from '../validation/validation';
 // import {haversineDistance} from '../geocoding/geocoding'
 // require('dotenv').config();
@@ -11,15 +12,16 @@ import MapComponent from '../map/map'
 export default function Form() {
   // const levenshtein = require('fast-levenshtein');
   // TODO: Replace with frontend URL
-  // const rootUrl = "http://localhost:8000"
-  //const rootUrl = "https://b9e7-74-101-57-2.ngrok-free.app"
-  const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
+  const rootUrl = "http://localhost:8000"
+  // const rootUrl = "https://b9e7-74-101-57-2.ngrok-free.app"
+  // const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
   // TODO: Default value is 0
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [requirePO, setRequirePO] = useState(false);
+  const [modal, setModal] = useState(false);
   
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -142,7 +144,7 @@ export default function Form() {
 
     // validate address
     const street1 = watch('Street_1')
-    const street2 = watch('Street_2') ?? ""
+    // const street2 = watch('Street_2') ?? ""
     // const street3 = watch('Street_3') ?? ""
     // const street4 = watch('Street_4') ?? ""
     const city = watch('City')
@@ -156,7 +158,8 @@ export default function Form() {
           "city": city,
           "state": state,
           "zip": zip,
-          "addressLine": [street1, street2]
+          "addressLine": [street1]
+          // "addressLine": [street1, street2]
         })
         // var coords = null
         setLoading(false)
@@ -167,16 +170,20 @@ export default function Form() {
             const addressArray = validationMsg.data.result.address.addressComponents; // Assuming your formatted address is comma-separated
             
             setValue("Street_1", addressArray[0].componentName.text + " " + addressArray[1].componentName.text)
-            if (addressArray.length > 7) {
-              setValue("Street_2", addressArray[2].componentName.text)
-              setValue("City", addressArray[3].componentName.text)
-              setValue("State", addressArray[4].componentName.text)
-              setValue("Zip", addressArray[5].componentName.text)
-            } else { // == 7
-              setValue("City", addressArray[2].componentName.text)
-              setValue("State", addressArray[3].componentName.text)
-              setValue("Zip", addressArray[4].componentName.text)
-            }
+            // if (addressArray.length > 7) {
+            //   setValue("Street_2", addressArray[2].componentName.text)
+            //   setValue("City", addressArray[3].componentName.text)
+            //   setValue("State", addressArray[4].componentName.text)
+            //   setValue("Zip", addressArray[5].componentName.text)
+            // } else { // == 7
+            //   setValue("City", addressArray[2].componentName.text)
+            //   setValue("State", addressArray[3].componentName.text)
+            //   setValue("Zip", addressArray[4].componentName.text)
+            // }
+            // setValue("Street_2", addressArray[addressArray.length - 6].componentName.text)
+            setValue("City", addressArray[addressArray.length - 5].componentName.text)
+            setValue("State", addressArray[addressArray.length - 4].componentName.text)
+            setValue("Zip", addressArray[addressArray.length - 3].componentName.text)
 
             console.log("addressComplete attribute is present.")
             
@@ -194,17 +201,21 @@ export default function Form() {
             console.log("addressComplete attribute is NOT present.")
 
             const addressArray = validationMsg.data.result.address.addressComponents;
+            // setValue("Street_1", addressArray[0].componentName.text + " " + addressArray[1].componentName.text)
+            // if (addressArray.length > 7) {
+            //   setValue("Street_2", addressArray[2].componentName.text)
+            //   setValue("City", addressArray[3].componentName.text)
+            //   setValue("State", addressArray[4].componentName.text)
+            //   setValue("Zip", addressArray[5].componentName.text)
+            // } else { // == 7
+            //   setValue("City", addressArray[2].componentName.text)
+            //   setValue("State", addressArray[3].componentName.text)
+            //   setValue("Zip", addressArray[4].componentName.text)
+            // }
             setValue("Street_1", addressArray[0].componentName.text + " " + addressArray[1].componentName.text)
-            if (addressArray.length > 7) {
-              setValue("Street_2", addressArray[2].componentName.text)
-              setValue("City", addressArray[3].componentName.text)
-              setValue("State", addressArray[4].componentName.text)
-              setValue("Zip", addressArray[5].componentName.text)
-            } else { // == 7
-              setValue("City", addressArray[2].componentName.text)
-              setValue("State", addressArray[3].componentName.text)
-              setValue("Zip", addressArray[4].componentName.text)
-            }
+            setValue("City", addressArray[addressArray.length - 5].componentName.text)
+            setValue("State", addressArray[addressArray.length - 4].componentName.text)
+            setValue("Zip", addressArray[addressArray.length - 3].componentName.text)
 
             alert("The address is NOT complete, but it may still be valid. Here's your formatted address" +
             `\n\n${validationMsg.data.result.address.formattedAddress}\n\n` + 
@@ -261,6 +272,7 @@ export default function Form() {
     const isValid = await trigger();
     if (isValid) {
       setLoading(true)
+      setModal(true)
       setStep((prevStep) => prevStep + 1);
       window.scrollTo(0, 0);
       var rawEmails = watch('Business_Emails').split(",")
@@ -430,15 +442,40 @@ export default function Form() {
 
   return (
     <form className="form" onSubmit={handleSubmit(onSubmit)}>
+      <ReactModal
+        className="site-matching-modal"
+        isOpen={modal}
+      >
+        <div className='site-matching-modal-content'>
+          <div style={{"display" : "flex", "alignItems" : "center", "gap": "10px"}}><i className="fa-solid fa-circle-info fa-xl" style={{"color": "#000000"}}></i><h2>Please read</h2></div>
+          <p>
+            We are matching your information to records in our database. Please read the following instructions for the next step.
+          </p>
+          <div className="site-matching-modal-content-section">
+            <div className="site-matching-modal-content-section-box">
+              <h4 className="site-matching-modal-content-section-box-title">New customers</h4>
+              <p>You should <b>not</b> see any match listed. Please click <span className="confirm-button">Confirm Site</span> and we will reach out to confirm your request later.</p>
+            </div>
+            
+            <div className="site-matching-modal-content-section-box">
+              <h4 className="site-matching-modal-content-section-box-title">Returning customers</h4>
+              <p>If you see your site <b>listed among the matches</b>, please click <span className="confirm-button">Confirm Site</span> to proceed. Otherwise, please click <span className="back-button">Go back</span> and correct your information.</p>
+            </div>
+          </div>
+          <button className="modal-button" onClick={() => {setModal(false)}}><i className="fa-solid fa-circle-check" style={{"color": "#ffffff"}}></i> Understood</button>
+        </div>
+      </ReactModal>
       {/* Loading animation */}
       {loading === true && 
-        <i className="fa-solid fa-spinner fa-spin-pulse fa-2xl" style={{"color": "#0056b3"}}></i>
+        <div style={{"fontFamily": "'Poppins', sans-serif;"}}>
+          <i className="spinner fa-solid fa-spinner fa-spin-pulse fa-2xl" style={{"color": "#0056b3", "marginTop": "100px"}}></i>
+          <p>Getting information to you as fast as possible. Please wait a moment...</p>
+        </div>
       }
       {/* <button type="button" onClick={test}>Test</button> */}
       {loading === false &&
         <div className="form-content">
           
-
           { submitted ? <div className='form-section'>
             <h3 className='subTitle'>Thank you, your request has been recorded</h3>
             <p>Our agents will reach out soon.</p>
@@ -591,20 +628,20 @@ export default function Form() {
             {errors['Email_Address'] && errors['Email_Address'].type === 'required' && <p style={{ color: 'red' }}>Email Address is required.</p>}
 
             <p>Phone Number <span className='required'>*</span></p>
-            <input className="input number" type="number" placeholder="Phone Number" {...register("Phone_Number", {required: true})} />
+            <input className="input number" type="tel" placeholder="Phone Number" {...register("Phone_Number", {required: true})}/>
             {errors['Phone_Number'] && errors['Phone_Number'].type === 'required' && <p style={{ color: 'red' }}>Phone Number is required.</p>}
 
             <p>Phone Number Ext.</p>
-            <input className="input number" type="number" placeholder="Ext" {...register("Phone_Number_Ext", {})} />
+            <input className="input number" type="tel" placeholder="Ext" {...register("Phone_Number_Ext", {})} />
 
             <p>Alternative Phone Number</p>
-            <input className="input number" type="number" placeholder="Alternative Phone Number" {...register("Alternative_Phone_Number", {})} />
+            <input className="input number" type="tel" placeholder="Alternative Phone Number" {...register("Alternative_Phone_Number", {})} />
 
             <p>Alternative Phone Number Ext.</p>
-            <input className="input number" type="number" placeholder="Ext" {...register("Alternative_Phone_Number_Ext", {})} />
+            <input className="input number" type="tel" placeholder="Ext" {...register("Alternative_Phone_Number_Ext", {})} />
             
             <h3 className="subTitle">Business Contact Info</h3>
-            <h4>These are used for the aglorithm to match your info to our database records. Please provide the best response for the best result.</h4>
+            <h4>These are used by the aglorithm to match your info to our database records. Please provide the best response for the best result.</h4>
             <p>Business Email Addresses (Please provide a list of email address(es) under your company's email domain) <span className='required'>*</span></p>
             <p>Seperate by comma (,)</p>
             <input className="input text" type="text" placeholder="Business Emails" {...register("Business_Emails", {required: true})} />
@@ -614,6 +651,14 @@ export default function Form() {
             <p>Seperate by comma (,)</p>
             <input className="input text" type="text" placeholder="Business Phone Numbers" {...register("Business_Phone_Numbers", {required: true})} />
             {errors['Business_Phone_Numbers'] && errors['Business_Phone_Numbers'].type === 'required' && <p style={{ color: 'red' }}>Business Phone Numbers is required.</p>}
+
+            <div className="tips" style={{"marginTop": "20px"}}>
+              <h4><i className="fa-solid fa-circle-info" style={{"color": "#000000"}}></i> Tips for getting the right site</h4>
+              <p>Make sure your business name and site address are correct. 
+                Pay attention to your business emails' domain addresses (ensure your are using the correct work email address). 
+                For business phone numbers, make sure you are using the numbers that you used to contact with DNAS.
+              </p>
+            </div>
 
             <div className="nav-buttons">
               <button className='form-button back' type="button" onClick={back}>Back</button>
@@ -629,11 +674,20 @@ export default function Form() {
             <h2 className='subTitle'>Matching Sites</h2>
             <p>Based on information your provided, here are the possible sites from our database that match your information.</p>
             <div className="tips">
-              <h4>Returning customers</h4>
-              <p>You should see your site information displayed below. You might see more than one site due to how we structure our database. 
-                If you see your site listed in the possible matches, please click 'Confirm Site' to proceed. Otherwise, please click 'Go back' and correct your information.</p>
+              <h4 className="tips-subtitle">New customers</h4>
+              <p>You should <b>not</b> see any match listed. Please click <span className="confirm-button">Confirm Site</span> and we will reach out to confirm your request later.</p>
+
+              <h4 className="tips-subtitle">Returning customers</h4>
+              <p>If you see your site <b>listed among the matches</b>, please click <span className="confirm-button">Confirm Site</span> to proceed. Otherwise, please click <span className="back-button">Go back</span> and correct your information.</p>
+              {/* <h4>Returning customers</h4>
+              <p>
+                You should see your site information displayed below. You might see more than one site due to how we structure our database. 
+                If you see your site listed in the possible matches, please click 'Confirm Site' to proceed. 
+                Otherwise, please click 'Go back' and correct your information.
+              </p>
               <h4>New customers</h4>
-              <p>Please click 'Confirm Site' and one of our agents will reach out to confirm your request later.</p>
+              <p>Please click 'Confirm Site' and one of our agents will reach out to confirm your request later.</p> */}
+              
             </div>
             <div className="site-info-wrapper">
               {

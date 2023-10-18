@@ -1,3 +1,67 @@
+.site-matching-modal {
+    margin: 40px;
+    padding: 40px 40px 80px 40px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+    overflow-y: auto;
+    max-height:75vh;
+    max-width: 90vw;
+    .site-matching-modal-content {
+        display: flex;
+        flex-direction: column;
+        .site-matching-modal-content-section {
+            display: flex;
+            gap: 25px;
+            /* overflow-x: auto; */
+            flex-wrap: wrap;
+            /* overflow-y: auto; */
+            .site-matching-modal-content-section-box {
+                max-width: 250px;
+                background-color: aliceblue;
+                padding: 0px 40px 20px 40px;
+                border-radius: 5px;
+                .site-matching-modal-content-section-box-title {
+                    color: #D05400;
+                }
+                .confirm-button {
+                    white-space: nowrap;
+                    background-color: #008AD0;
+                    padding: 2px 8px;
+                    border-radius: 5px;
+                    color: white;
+                }
+                .back-button {
+                    white-space: nowrap;
+                    background-color: #D05400;
+                    padding: 2px 8px;
+                    border-radius: 5px;
+                    color: white;
+                }
+            }
+        }
+
+        .modal-button {
+            /* display: flex;
+            flex-direction: row;
+            width: 100%;
+            margin-top: 40px; */
+            margin-top: 25px;
+            background-color: #D05400;
+            /* .form-button { */
+            font-size: medium;
+            /* width: 120px; */
+            height: 50px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            /* } */
+        }
+    }
+}
+
 .form {
 
     width: auto;
@@ -73,6 +137,23 @@
                 padding: 10px 30px;
                 border-radius: 10px;
                 margin-bottom: 20px;
+                .tips-subtitle {
+                    color: #D05400;
+                }
+                .confirm-button {
+                    white-space: nowrap;
+                    background-color: #008AD0;
+                    padding: 2px 8px;
+                    border-radius: 5px;
+                    color: white;
+                }
+                .back-button {
+                    white-space: nowrap;
+                    background-color: #D05400;
+                    padding: 2px 8px;
+                    border-radius: 5px;
+                    color: white;
+                }
             }
 
             .site-info-wrapper {
