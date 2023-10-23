@@ -27,7 +27,7 @@ export default function Form() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [possibleSites, setPossibleSites] = useState([]);
-  const [similarSites, setSimilarSites] = useState([]);
+  // const [similarSites, setSimilarSites] = useState([]);
   const [possibleSiteEquipments, setPossibleSiteEquipments] = useState<{ [key: string]: any }[]>([]);
   const [lat, setLat] = useState(40.728331390509545);
   const [lng, setLng] = useState(-73.69377750670284);
