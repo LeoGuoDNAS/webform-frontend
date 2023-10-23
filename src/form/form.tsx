@@ -14,7 +14,8 @@ export default function Form() {
   // TODO: Replace with frontend URL
   // const rootUrl = "http://localhost:8000"
   // const rootUrl = "https://b9e7-74-101-57-2.ngrok-free.app"
-  const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
+  const rootUrl = "https://webform-backend-bbc1ba2d2fc6.herokuapp.com"
+  // const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
   // const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
   // TODO: Default value is 0
@@ -26,6 +27,7 @@ export default function Form() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [possibleSites, setPossibleSites] = useState([]);
+  const [similarSites, setSimilarSites] = useState([]);
   const [possibleSiteEquipments, setPossibleSiteEquipments] = useState<{ [key: string]: any }[]>([]);
   const [lat, setLat] = useState(40.728331390509545);
   const [lng, setLng] = useState(-73.69377750670284);
@@ -228,6 +230,7 @@ export default function Form() {
           console.log("Address Validation API is NOT OK");
           alert("Error. Address validation API call failed with error code 4xx")
         }
+        
         // if (addressIsValid) {
         //   setStep((prevStep) => prevStep + 1);
         //   window.scrollTo(0, 0);
@@ -307,9 +310,13 @@ export default function Form() {
           //   setLoading(false)
           // }
           setPossibleSites(response.data)
-          // console.log(possibleSites.length)
+
+          // console.log("Similar Site Info")
+          // console.log(response.data[1])
+          // setSimilarSites(response.data[1])
 
           if (response.data.length === 0) {
+          // if (response.data[0].length === 0 && response.data[1].length === 0) {
             await axios.get(`${rootUrl}/api/v1/clientAddressPlaceholder/`)
               .then(clientSites => {
                 var siteEquipments: { [key: string]: any }[] = [];
@@ -338,6 +345,13 @@ export default function Form() {
                     }
                   }
                 }
+                // for (var i = 0; i < response.data[1].length; i++) {
+                //   for (var j = 0; j < clientSites.data.length; j++) {
+                //     if (response.data[1][i]['clntste_rn'] === clientSites.data[j]['clntste_rn'] && (response.data[1][i]['clntste_rn'] !== "350161652" || response.data[1][i]['clntste_rn'] !== 350161652)) {
+                //       siteEquipments = siteEquipments.concat(clientSites.data[j])
+                //     }
+                //   }
+                // }
                 console.log("Site Equipment Info")
                 setPossibleSiteEquipments(siteEquipments)
                 console.log(siteEquipments)
@@ -523,7 +537,7 @@ export default function Form() {
 
         {step === 0 && (
           <div className='form-section'>
-            {/* <img src={process.env.PUBLIC_URL + '/img/dnas-logo.png'} alt='DNAS Logo' /> */}
+            <img src={process.env.PUBLIC_URL + '/img/dnas-logo.png'} alt='DNAS Logo' />
             <h1 className='title'>Welcome to DNAS Non-Contract Customer Service Request Form</h1>
             <h3 className='subTitle'>Day & Nite / All Service / Popular Plumbing</h3>
             <h4 className='subTitle'>Visit our website to learn more about us <a href="https://www.wearetheone.com">www.wearetheone.com</a></h4>
@@ -707,12 +721,27 @@ export default function Form() {
               }
 
               {
-                (!possibleSites || possibleSites.length === 0) &&
+                similarSites &&
+                  similarSites.map((site, index) => (
+                    <div className="site-info">
+                      <div key={index} className="site">
+                        <h4>Business Name</h4>
+                        <p>{site['clntste_nme']}</p>
+                        <h4>Site Address</h4>
+                        <p>{site['clntste_addrss_shp_addrss_strt']}</p>
+                        <p>{site['clntste_addrss_shp_addrss_cty']}, {site['clntste_addrss_shp_addrss_stte']} {site['clntste_addrss_shp_addrss_zp']}</p>
+                      </div>
+                    </div>
+                  )
+                )
+              }
+
+              {
+                (!possibleSites || possibleSites.length === 0) && (!similarSites || similarSites.length === 0) &&
                   <div className="site-info">
                     <h4>No customer site from our database matches your information.</h4>
                     <p>If you are a returning customer, please go back and correct your information. If you are a new customer, gracefully ignore this message and proceed to the next step.</p>
                   </div>
-
               }
             </div>
 
@@ -833,10 +862,10 @@ export default function Form() {
                           <div>
                             {siteEquipment['clntste_nme']}
                             
-                            <p>
-                              <b>Name</b>&nbsp;&nbsp;{siteEquipment['clntsteeqpmnt_nme']}&nbsp;&nbsp;
-                              <b>Manufacturer</b>&nbsp;&nbsp;{siteEquipment['clntsteeqpmnt_mnfctrr'] ? siteEquipment['clntsteeqpmnt_mnfctrr'] : "n/a"}&nbsp;&nbsp;
-                              <b>Model</b>&nbsp;&nbsp;{siteEquipment['clntsteeqpmnt_mnfctrr_mdl'] ? siteEquipment['clntsteeqpmnt_mnfctrr_mdl'] : "n/a"}
+                            <p className="equipment-list-li-content-text">
+                              <b className="text">Name&nbsp;&nbsp;</b><p className="text">{siteEquipment['clntsteeqpmnt_nme']}&nbsp;&nbsp;</p>
+                              <b className="text">Manufacturer&nbsp;&nbsp;</b><p className="text">{siteEquipment['clntsteeqpmnt_mnfctrr'] ? siteEquipment['clntsteeqpmnt_mnfctrr'] : "n/a"}&nbsp;&nbsp;</p>
+                              <b className="text">Model&nbsp;&nbsp;</b><p className="text">{siteEquipment['clntsteeqpmnt_mnfctrr_mdl'] ? siteEquipment['clntsteeqpmnt_mnfctrr_mdl'] : "n/a"}</p>
                             </p>
                           </div>
                           <i className="equipment-list-li-content-check fa-solid fa-circle-check" style={{"color": "#ffffff"}}></i>
