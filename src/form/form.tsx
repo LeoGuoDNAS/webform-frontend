@@ -720,7 +720,7 @@ export default function Form() {
                 )
               }
 
-              {
+              {/* {
                 similarSites &&
                   similarSites.map((site, index) => (
                     <div className="site-info">
@@ -734,10 +734,11 @@ export default function Form() {
                     </div>
                   )
                 )
-              }
+              } */}
 
               {
-                (!possibleSites || possibleSites.length === 0) && (!similarSites || similarSites.length === 0) &&
+                // (!possibleSites || possibleSites.length === 0) && (!similarSites || similarSites.length === 0) &&
+                (!possibleSites || possibleSites.length === 0) &&  
                   <div className="site-info">
                     <h4>No customer site from our database matches your information.</h4>
                     <p>If you are a returning customer, please go back and correct your information. If you are a new customer, gracefully ignore this message and proceed to the next step.</p>
