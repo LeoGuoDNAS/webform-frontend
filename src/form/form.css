@@ -382,7 +382,11 @@
 @media screen and (min-width: 768px) {
     .form .form-content {
         width: 60%;
-        margin: 0 auto;
+        margin: 20px auto;
+    }
+    .site-matching-modal {
+        width: 60%;
+        margin: 20px auto;
     }
 }
 
@@ -390,5 +394,9 @@
     .form .form-content {
         width: 30%;
         margin: 0 auto;
+    }
+    .site-matching-modal {
+        width: 30%;
+        margin: 20px auto;
     }
 }
