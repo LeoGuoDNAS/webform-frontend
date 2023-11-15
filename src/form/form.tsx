@@ -4,7 +4,7 @@ import "./form.css";
 import axios from 'axios';
 import {FormModel} from '../models/formModel';
 import MapComponent from '../map/map'
-import ReactModal from 'react-modal';
+// import ReactModal from 'react-modal';
 // import {validateAddress, AddressValidationProps} from '../validation/validation';
 // import {haversineDistance} from '../geocoding/geocoding'
 // require('dotenv').config();
@@ -12,9 +12,9 @@ import ReactModal from 'react-modal';
 export default function Form() {
   // const levenshtein = require('fast-levenshtein');
   // TODO: Replace with frontend URL
-  const rootUrl = "http://localhost:8000"
+  // const rootUrl = "http://localhost:8000"
   // const rootUrl = "https://b9e7-74-101-57-2.ngrok-free.app"
-  // const rootUrl = "https://webform-backend-bbc1ba2d2fc6.herokuapp.com"
+  const rootUrl = "https://webform-backend-bbc1ba2d2fc6.herokuapp.com"
   // const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
   // const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
