@@ -57,8 +57,8 @@ export interface FormModel {
     "OT_Approved" : YesOrNo;
     "Comments": string;
     "Images": FileList | null;
-    "Business_Emails": string;
-    "Business_Phone_Numbers": string;
+    // "Business_Emails": string;
+    // "Business_Phone_Numbers": string;
 }
 
 export interface AddressValidationProps {

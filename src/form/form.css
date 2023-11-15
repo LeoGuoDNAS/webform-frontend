@@ -87,13 +87,13 @@
             text-align: left;
             margin-top: 20px;
             margin-bottom: 80px;
-            .equipment-list-wrapper {
+            /* .equipment-list-wrapper {
                 box-sizing: border-box;
                 width: 100%;
                 border: 2px solid #008AD0;
                 border-radius: 5px;
                 padding: 15px;
-            }
+            } */
             
             .equipment-list {
                 margin: 0;
@@ -148,6 +148,9 @@
                 margin-bottom: 20px;
                 .tips-subtitle {
                     color: #D05400;
+                }
+                .tips-subtitle-blue {
+                    color: #008AD0;
                 }
                 .confirm-button {
                     white-space: nowrap;
@@ -283,18 +286,23 @@
             }
 
             .dnas-app-logo {
+                object-fit: cover;
                 width: 120px;
+                height: 120px;
+                border: 1px solid #777777;
+                border-radius: 25px;
             }
 
             .qr-codes {
                 display: flex;
                 flex-direction: row;
                 flex-wrap: wrap;
+                gap: 50px;
                 /* overflow-wrap: normal; */
                 /* overflow: scroll; */
                 width: 100%;
                 .qr-code-container {
-                    margin: 50px;
+                    /* margin: 25px; */
                     display: flex;
                     flex-direction: column;
                     /* width: 100%; */

@@ -12,9 +12,9 @@ import ReactModal from 'react-modal';
 export default function Form() {
   // const levenshtein = require('fast-levenshtein');
   // TODO: Replace with frontend URL
-  // const rootUrl = "http://localhost:8000"
+  const rootUrl = "http://localhost:8000"
   // const rootUrl = "https://b9e7-74-101-57-2.ngrok-free.app"
-  const rootUrl = "https://webform-backend-bbc1ba2d2fc6.herokuapp.com"
+  // const rootUrl = "https://webform-backend-bbc1ba2d2fc6.herokuapp.com"
   // const rootUrl = "https://r3jisf3gkibaicbcdr6y5kerka0mnbny.lambda-url.us-east-1.on.aws" // replace with deployed URL in production
   // const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,11 +22,11 @@ export default function Form() {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [requirePO, setRequirePO] = useState(false);
-  const [modal, setModal] = useState(false);
+  // const [modal, setModal] = useState(false);
   
-  const [searchTerm, setSearchTerm] = useState('');
+  // const [searchTerm, setSearchTerm] = useState('');
 
-  const [possibleSites, setPossibleSites] = useState([]);
+  // const [possibleSites, setPossibleSites] = useState([]);
   // const [similarSites, setSimilarSites] = useState([]);
   const [possibleSiteEquipments, setPossibleSiteEquipments] = useState<{ [key: string]: any }[]>([]);
   const [lat, setLat] = useState(40.728331390509545);
@@ -140,109 +140,109 @@ export default function Form() {
     setValue("Site_RN", equipment['clntste_rn']);
   };
 
-  const addressValidation = async () => {
-    // setLoading(true)
-    const isValid = await trigger(); // trigger validation\
+  // const addressValidation = async () => {
+  //   // setLoading(true)
+  //   const isValid = await trigger(); // trigger validation\
 
-    // validate address
-    const street1 = watch('Street_1')
-    // const street2 = watch('Street_2') ?? ""
-    // const street3 = watch('Street_3') ?? ""
-    // const street4 = watch('Street_4') ?? ""
-    const city = watch('City')
-    const state = watch('State')
-    const zip = watch('Zip')
+  //   // validate address
+  //   const street1 = watch('Street_1')
+  //   // const street2 = watch('Street_2') ?? ""
+  //   // const street3 = watch('Street_3') ?? ""
+  //   // const street4 = watch('Street_4') ?? ""
+  //   const city = watch('City')
+  //   const state = watch('State')
+  //   const zip = watch('Zip')
     
-    if (isValid) {
-      try {
-        setLoading(true)
-        const validationMsg = await axios.post(`${rootUrl}/api/v1/validateAddress`, {
-          "city": city,
-          "state": state,
-          "zip": zip,
-          "addressLine": [street1]
-          // "addressLine": [street1, street2]
-        })
-        // var coords = null
-        setLoading(false)
+  //   if (isValid) {
+  //     try {
+  //       setLoading(true)
+  //       const validationMsg = await axios.post(`${rootUrl}/api/v1/validateAddress`, {
+  //         "city": city,
+  //         "state": state,
+  //         "zip": zip,
+  //         "addressLine": [street1]
+  //         // "addressLine": [street1, street2]
+  //       })
+  //       // var coords = null
+  //       setLoading(false)
       
-        if (validationMsg.status === 200) {
-          console.log("Address Validation API is OK");
-          if (validationMsg.data && validationMsg.data.result && validationMsg.data.result.verdict && validationMsg.data.result.verdict.addressComplete) {
-            const addressArray = validationMsg.data.result.address.addressComponents; // Assuming your formatted address is comma-separated
+  //       if (validationMsg.status === 200) {
+  //         console.log("Address Validation API is OK");
+  //         if (validationMsg.data && validationMsg.data.result && validationMsg.data.result.verdict && validationMsg.data.result.verdict.addressComplete) {
+  //           const addressArray = validationMsg.data.result.address.addressComponents; // Assuming your formatted address is comma-separated
             
-            setValue("Street_1", addressArray[0].componentName.text + " " + addressArray[1].componentName.text)
-            // if (addressArray.length > 7) {
-            //   setValue("Street_2", addressArray[2].componentName.text)
-            //   setValue("City", addressArray[3].componentName.text)
-            //   setValue("State", addressArray[4].componentName.text)
-            //   setValue("Zip", addressArray[5].componentName.text)
-            // } else { // == 7
-            //   setValue("City", addressArray[2].componentName.text)
-            //   setValue("State", addressArray[3].componentName.text)
-            //   setValue("Zip", addressArray[4].componentName.text)
-            // }
-            // setValue("Street_2", addressArray[addressArray.length - 6].componentName.text)
-            setValue("City", addressArray[addressArray.length - 5].componentName.text)
-            setValue("State", addressArray[addressArray.length - 4].componentName.text)
-            setValue("Zip", addressArray[addressArray.length - 3].componentName.text)
+  //           setValue("Street_1", addressArray[0].componentName.text + " " + addressArray[1].componentName.text)
+  //           // if (addressArray.length > 7) {
+  //           //   setValue("Street_2", addressArray[2].componentName.text)
+  //           //   setValue("City", addressArray[3].componentName.text)
+  //           //   setValue("State", addressArray[4].componentName.text)
+  //           //   setValue("Zip", addressArray[5].componentName.text)
+  //           // } else { // == 7
+  //           //   setValue("City", addressArray[2].componentName.text)
+  //           //   setValue("State", addressArray[3].componentName.text)
+  //           //   setValue("Zip", addressArray[4].componentName.text)
+  //           // }
+  //           // setValue("Street_2", addressArray[addressArray.length - 6].componentName.text)
+  //           setValue("City", addressArray[addressArray.length - 5].componentName.text)
+  //           setValue("State", addressArray[addressArray.length - 4].componentName.text)
+  //           setValue("Zip", addressArray[addressArray.length - 3].componentName.text)
 
-            console.log("addressComplete attribute is present.")
+  //           console.log("addressComplete attribute is present.")
             
             
-            alert("Address is complete and validated, here's your formatted address:" +
-            `\n\n${validationMsg.data.result.address.formattedAddress}\n\n` +
-            "If you think this is incorrect, please go back to change your address."
-            // + `\nYour coordinate is: ${}`
-            )
-            // setStep((prevStep) => prevStep + 1);
-            // window.scrollTo(0, 0);
-          } else {
-            // setLoading(false)
-            console.log(validationMsg.data.result)
-            console.log("addressComplete attribute is NOT present.")
+  //           alert("Address is complete and validated, here's your formatted address:" +
+  //           `\n\n${validationMsg.data.result.address.formattedAddress}\n\n` +
+  //           "If you think this is incorrect, please go back to change your address."
+  //           // + `\nYour coordinate is: ${}`
+  //           )
+  //           // setStep((prevStep) => prevStep + 1);
+  //           // window.scrollTo(0, 0);
+  //         } else {
+  //           // setLoading(false)
+  //           console.log(validationMsg.data.result)
+  //           console.log("addressComplete attribute is NOT present.")
 
-            const addressArray = validationMsg.data.result.address.addressComponents;
-            // setValue("Street_1", addressArray[0].componentName.text + " " + addressArray[1].componentName.text)
-            // if (addressArray.length > 7) {
-            //   setValue("Street_2", addressArray[2].componentName.text)
-            //   setValue("City", addressArray[3].componentName.text)
-            //   setValue("State", addressArray[4].componentName.text)
-            //   setValue("Zip", addressArray[5].componentName.text)
-            // } else { // == 7
-            //   setValue("City", addressArray[2].componentName.text)
-            //   setValue("State", addressArray[3].componentName.text)
-            //   setValue("Zip", addressArray[4].componentName.text)
-            // }
-            setValue("Street_1", addressArray[0].componentName.text + " " + addressArray[1].componentName.text)
-            setValue("City", addressArray[addressArray.length - 5].componentName.text)
-            setValue("State", addressArray[addressArray.length - 4].componentName.text)
-            setValue("Zip", addressArray[addressArray.length - 3].componentName.text)
+  //           const addressArray = validationMsg.data.result.address.addressComponents;
+  //           // setValue("Street_1", addressArray[0].componentName.text + " " + addressArray[1].componentName.text)
+  //           // if (addressArray.length > 7) {
+  //           //   setValue("Street_2", addressArray[2].componentName.text)
+  //           //   setValue("City", addressArray[3].componentName.text)
+  //           //   setValue("State", addressArray[4].componentName.text)
+  //           //   setValue("Zip", addressArray[5].componentName.text)
+  //           // } else { // == 7
+  //           //   setValue("City", addressArray[2].componentName.text)
+  //           //   setValue("State", addressArray[3].componentName.text)
+  //           //   setValue("Zip", addressArray[4].componentName.text)
+  //           // }
+  //           setValue("Street_1", addressArray[0].componentName.text + " " + addressArray[1].componentName.text)
+  //           setValue("City", addressArray[addressArray.length - 5].componentName.text)
+  //           setValue("State", addressArray[addressArray.length - 4].componentName.text)
+  //           setValue("Zip", addressArray[addressArray.length - 3].componentName.text)
 
-            alert("The address is NOT complete, but it may still be valid. Here's your formatted address" +
-            `\n\n${validationMsg.data.result.address.formattedAddress}\n\n` + 
-            "If you believe this is the correct address, please dismiss this message and proceed. Otherwise, go back and change your address.")
-          }
-          setStep((prevStep) => prevStep + 1);
-          window.scrollTo(0, 0);
-        } else {
-          // setLoading(false)
-          console.log("Address Validation API is NOT OK");
-          alert("Error. Address validation API call failed with error code 4xx")
-        }
+  //           alert("The address is NOT complete, but it may still be valid. Here's your formatted address" +
+  //           `\n\n${validationMsg.data.result.address.formattedAddress}\n\n` + 
+  //           "If you believe this is the correct address, please dismiss this message and proceed. Otherwise, go back and change your address.")
+  //         }
+  //         setStep((prevStep) => prevStep + 1);
+  //         window.scrollTo(0, 0);
+  //       } else {
+  //         // setLoading(false)
+  //         console.log("Address Validation API is NOT OK");
+  //         alert("Error. Address validation API call failed with error code 4xx")
+  //       }
         
-        // if (addressIsValid) {
-        //   setStep((prevStep) => prevStep + 1);
-        //   window.scrollTo(0, 0);
-        // } else {
-        //   alert("Address is not valid, double check your input")
-        // }
-      } catch (error) {
-        // setLoading(false)
-        alert(`Error. Address validation API call failed with error ${error}`)
-      }
-    }
-  };
+  //       // if (addressIsValid) {
+  //       //   setStep((prevStep) => prevStep + 1);
+  //       //   window.scrollTo(0, 0);
+  //       // } else {
+  //       //   alert("Address is not valid, double check your input")
+  //       // }
+  //     } catch (error) {
+  //       // setLoading(false)
+  //       alert(`Error. Address validation API call failed with error ${error}`)
+  //     }
+  //   }
+  // };
 
   const nextPage = async () => {
     // setLoading(true)
@@ -254,6 +254,28 @@ export default function Form() {
     }
     // setLoading(false)
   };
+
+  const loadEquipments = async () => {
+    setLoading(true)
+    await axios.get(`${rootUrl}/api/v1/clientAddressPlaceholder/`)
+      .then(clientSites => {
+        var siteEquipments: { [key: string]: any }[] = [];
+        for (var j = 0; j < clientSites.data.length; j++) {
+          siteEquipments = siteEquipments.concat(clientSites.data[j])
+        }
+        setPossibleSiteEquipments(siteEquipments)
+        setLoading(false)
+      })
+      .catch(error => {
+        console.log("There was an error loading placeholder site equipments!", error);
+        setLoading(false)
+      })
+    const isValid = await trigger();
+    if (isValid) {
+      setStep((prevStep) => prevStep + 1);
+      window.scrollTo(0, 0);
+    }
+  }
 
   const back = async () => {
     setStep((prevStep) => prevStep - 1);
@@ -271,137 +293,137 @@ export default function Form() {
     // setSelectedFiles(null)
   };
 
-  const getSiteInfo = async () => {
-    const isValid = await trigger();
-    if (isValid) {
-      setLoading(true)
-      setModal(true)
-      setStep((prevStep) => prevStep + 1);
-      window.scrollTo(0, 0);
-      var rawEmails = watch('Business_Emails').split(",")
-      var emails = rawEmails.map(email => email.trim().toLowerCase())
+  // const getSiteInfo = async () => {
+  //   const isValid = await trigger();
+  //   if (isValid) {
+  //     setLoading(true)
+  //     setModal(true)
+  //     setStep((prevStep) => prevStep + 1);
+  //     window.scrollTo(0, 0);
+  //     // var rawEmails = watch('Business_Emails').split(",")
+  //     // var emails = rawEmails.map(email => email.trim().toLowerCase())
 
-      var rawPhones = watch('Business_Phone_Numbers').split(",")
-      var phones = rawPhones.map(phone => phone.trim().toLowerCase())
+  //     // var rawPhones = watch('Business_Phone_Numbers').split(",")
+  //     // var phones = rawPhones.map(phone => phone.trim().toLowerCase())
 
-      await axios.post(`${rootUrl}/api/v1/getSiteInfo/`, {
-        "businessName": watch('Business_Name'),
-        "street1": watch('Street_1'),
-        "city": watch('City'),
-        "state": watch('State'),
-        "zip": watch('Zip'),
-        "email": watch('Email_Address'),
-        "phone": watch('Phone_Number'),
-        "emails": emails,
-        "phoneNumbers": phones
-      })
-        .then(async response => {
-          // setLoading(false)
-          console.log("Site Info")
-          console.log(response.data)
-          // if (response.data.length === 1) {
-          //   // only one match
-          //   // best scenario
-          //   // display info
-          //   setPossibleSites(response.data)
-          //   setLoading(false)
-          // } else {
-          //   //setStep((prevStep) => prevStep + 1);
-          //   setLoading(false)
-          // }
-          setPossibleSites(response.data)
+  //     await axios.post(`${rootUrl}/api/v1/getSiteInfo/`, {
+  //       "businessName": watch('Business_Name'),
+  //       "street1": watch('Street_1'),
+  //       "city": watch('City'),
+  //       "state": watch('State'),
+  //       "zip": watch('Zip'),
+  //       "email": watch('Email_Address'),
+  //       "phone": watch('Phone_Number'),
+  //       // "emails": emails,
+  //       // "phoneNumbers": phones
+  //     })
+  //       .then(async response => {
+  //         // setLoading(false)
+  //         console.log("Site Info")
+  //         console.log(response.data)
+  //         // if (response.data.length === 1) {
+  //         //   // only one match
+  //         //   // best scenario
+  //         //   // display info
+  //         //   setPossibleSites(response.data)
+  //         //   setLoading(false)
+  //         // } else {
+  //         //   //setStep((prevStep) => prevStep + 1);
+  //         //   setLoading(false)
+  //         // }
+  //         setPossibleSites(response.data)
 
-          // console.log("Similar Site Info")
-          // console.log(response.data[1])
-          // setSimilarSites(response.data[1])
+  //         // console.log("Similar Site Info")
+  //         // console.log(response.data[1])
+  //         // setSimilarSites(response.data[1])
 
-          if (response.data.length === 0) {
-          // if (response.data[0].length === 0 && response.data[1].length === 0) {
-            await axios.get(`${rootUrl}/api/v1/clientAddressPlaceholder/`)
-              .then(clientSites => {
-                var siteEquipments: { [key: string]: any }[] = [];
-                for (var j = 0; j < clientSites.data.length; j++) {
-                  siteEquipments = siteEquipments.concat(clientSites.data[j])
-                }
-                console.log("Site Equipment Info")
-                setPossibleSiteEquipments(siteEquipments)
-                console.log(siteEquipments)
-                setLoading(false)
-              })
-              .catch(error => {
-                console.log("There was an error!", error);
-                setLoading(false)
-              })
-          } else {
-            await axios.get(`${rootUrl}/api/v1/clientAddressByZip/${watch('Zip').trim().toLowerCase()}`)
-              .then(clientSites => {
-                var siteEquipments: { [key: string]: any }[] = [];
-                for (var i = 0; i < response.data.length; i++) {
-                  for (var j = 0; j < clientSites.data.length; j++) {
-                    if (response.data[i]['clntste_rn'] === clientSites.data[j]['clntste_rn'] && (response.data[i]['clntste_rn'] !== "350161652" || response.data[i]['clntste_rn'] !== 350161652)) {
-                      // console.log(response.data[i]['clntste_rn'])
-                      siteEquipments = siteEquipments.concat(clientSites.data[j])
-                      // setPossibleSiteEquipments(possibleSiteEquipments.concat(clientSites.data[j]))
-                    }
-                  }
-                }
-                // for (var i = 0; i < response.data[1].length; i++) {
-                //   for (var j = 0; j < clientSites.data.length; j++) {
-                //     if (response.data[1][i]['clntste_rn'] === clientSites.data[j]['clntste_rn'] && (response.data[1][i]['clntste_rn'] !== "350161652" || response.data[1][i]['clntste_rn'] !== 350161652)) {
-                //       siteEquipments = siteEquipments.concat(clientSites.data[j])
-                //     }
-                //   }
-                // }
-                console.log("Site Equipment Info")
-                setPossibleSiteEquipments(siteEquipments)
-                console.log(siteEquipments)
-                setLoading(false)
-              })
-              .catch(error => {
-                console.log("There was an error!", error);
-                setLoading(false)
-              })
-          }
-        })
-      .catch(error => {
-        console.log("There was an error!", error);
-        setLoading(false)
-      })
-    }
-    // setLoading(true)
+  //         if (response.data.length === 0) {
+  //         // if (response.data[0].length === 0 && response.data[1].length === 0) {
+  //           await axios.get(`${rootUrl}/api/v1/clientAddressPlaceholder/`)
+  //             .then(clientSites => {
+  //               var siteEquipments: { [key: string]: any }[] = [];
+  //               for (var j = 0; j < clientSites.data.length; j++) {
+  //                 siteEquipments = siteEquipments.concat(clientSites.data[j])
+  //               }
+  //               console.log("Site Equipment Info")
+  //               setPossibleSiteEquipments(siteEquipments)
+  //               console.log(siteEquipments)
+  //               setLoading(false)
+  //             })
+  //             .catch(error => {
+  //               console.log("There was an error!", error);
+  //               setLoading(false)
+  //             })
+  //         } else {
+  //           await axios.get(`${rootUrl}/api/v1/clientAddressByZip/${watch('Zip').trim().toLowerCase()}`)
+  //             .then(clientSites => {
+  //               var siteEquipments: { [key: string]: any }[] = [];
+  //               for (var i = 0; i < response.data.length; i++) {
+  //                 for (var j = 0; j < clientSites.data.length; j++) {
+  //                   if (response.data[i]['clntste_rn'] === clientSites.data[j]['clntste_rn'] && (response.data[i]['clntste_rn'] !== "350161652" || response.data[i]['clntste_rn'] !== 350161652)) {
+  //                     // console.log(response.data[i]['clntste_rn'])
+  //                     siteEquipments = siteEquipments.concat(clientSites.data[j])
+  //                     // setPossibleSiteEquipments(possibleSiteEquipments.concat(clientSites.data[j]))
+  //                   }
+  //                 }
+  //               }
+  //               // for (var i = 0; i < response.data[1].length; i++) {
+  //               //   for (var j = 0; j < clientSites.data.length; j++) {
+  //               //     if (response.data[1][i]['clntste_rn'] === clientSites.data[j]['clntste_rn'] && (response.data[1][i]['clntste_rn'] !== "350161652" || response.data[1][i]['clntste_rn'] !== 350161652)) {
+  //               //       siteEquipments = siteEquipments.concat(clientSites.data[j])
+  //               //     }
+  //               //   }
+  //               // }
+  //               console.log("Site Equipment Info")
+  //               setPossibleSiteEquipments(siteEquipments)
+  //               console.log(siteEquipments)
+  //               setLoading(false)
+  //             })
+  //             .catch(error => {
+  //               console.log("There was an error!", error);
+  //               setLoading(false)
+  //             })
+  //         }
+  //       })
+  //     .catch(error => {
+  //       console.log("There was an error!", error);
+  //       setLoading(false)
+  //     })
+  //   }
+  //   // setLoading(true)
     
-    // await axios.post(`${rootUrl}/api/v1/getSiteInfo/`, {
-    //   "businessName": watch('Business_Name'),
-    //   "street1": watch('Street_1'),
-    //   "city": watch('City'),
-    //   "state": watch('State'),
-    //   "zip": watch('Zip'),
-    //   "email": watch('Email_Address'),
-    //   "phone": watch('Phone_Number'),
-    // })
-    //   .then(response => {
-    //     // setLoading(false)
-    //     console.log("Site Info")
-    //     console.log(response.data)
-    //     // if (response.data.length === 1) {
-    //     //   // only one match
-    //     //   // best scenario
-    //     //   // display info
-    //     //   setPossibleSites(response.data)
-    //     //   setLoading(false)
-    //     // } else {
-    //     //   //setStep((prevStep) => prevStep + 1);
-    //     //   setLoading(false)
-    //     // }
-    //     setPossibleSites(response.data)
-    //     setLoading(false)
-    //   })
-    //   .catch(error => {
-    //     console.log("There was an error!", error);
-    //     setLoading(false)
-    //   })
+  //   // await axios.post(`${rootUrl}/api/v1/getSiteInfo/`, {
+  //   //   "businessName": watch('Business_Name'),
+  //   //   "street1": watch('Street_1'),
+  //   //   "city": watch('City'),
+  //   //   "state": watch('State'),
+  //   //   "zip": watch('Zip'),
+  //   //   "email": watch('Email_Address'),
+  //   //   "phone": watch('Phone_Number'),
+  //   // })
+  //   //   .then(response => {
+  //   //     // setLoading(false)
+  //   //     console.log("Site Info")
+  //   //     console.log(response.data)
+  //   //     // if (response.data.length === 1) {
+  //   //     //   // only one match
+  //   //     //   // best scenario
+  //   //     //   // display info
+  //   //     //   setPossibleSites(response.data)
+  //   //     //   setLoading(false)
+  //   //     // } else {
+  //   //     //   //setStep((prevStep) => prevStep + 1);
+  //   //     //   setLoading(false)
+  //   //     // }
+  //   //     setPossibleSites(response.data)
+  //   //     setLoading(false)
+  //   //   })
+  //   //   .catch(error => {
+  //   //     console.log("There was an error!", error);
+  //   //     setLoading(false)
+  //   //   })
 
-  };
+  // };
 
   const isResidential = async () => {
     setStep(-1);
@@ -456,7 +478,7 @@ export default function Form() {
 
   return (
     <form className="form" onSubmit={handleSubmit(onSubmit)}>
-      <ReactModal
+      {/* <ReactModal
         className="site-matching-modal"
         isOpen={modal}
       >
@@ -478,10 +500,10 @@ export default function Form() {
           </div>
           <button className="modal-button" onClick={() => {setModal(false)}}><i className="fa-solid fa-circle-check" style={{"color": "#ffffff"}}></i> Understood</button>
         </div>
-      </ReactModal>
+      </ReactModal> */}
       {/* Loading animation */}
       {loading === true && 
-        <div style={{"fontFamily": "'Poppins', sans-serif;"}}>
+        <div style={{"fontFamily": "'Poppins', sans-serif"}}>
           <i className="spinner fa-solid fa-spinner fa-spin-pulse fa-2xl" style={{"color": "#0056b3", "marginTop": "100px"}}></i>
           <p>Getting information to you as fast as possible. Please wait a moment...</p>
         </div>
@@ -502,7 +524,7 @@ export default function Form() {
           <div className='form-section'>
             <h3 className='subTitle'>We are sorry we could not assist you. We only provide service to commercial locations. If you are a commercial customer, click the button to go back.</h3>
             <div className="nav-buttons">
-              <button className='form-button back' type="button" onClick={home}>Back</button>
+              <button className='form-button back' type="button" onClick={home}><i className="fa-solid fa-caret-left" style={{"color": "#ffffff"}}></i> Back</button>
             </div>
           </div>
         )}
@@ -510,27 +532,43 @@ export default function Form() {
         {step === -2 && (
           <div className='form-section'>
             <h3 className='subTitle'>Please download DNAS Connect to proceed, this web form is for non-contract customers only.</h3>
-            <img className='dnas-app-logo' src={process.env.PUBLIC_URL + '/img/dnas-connect-logo.png'} alt='DNAS Connect app icon'/>
-            <p>"DNAS Connect" is available for download for both iOS and Android devices</p>
+
+            {/* <img className='dnas-app-logo' src={process.env.PUBLIC_URL + '/img/dnas-connect-logo.png'} alt='DNAS Connect app icon'/> */}
+            {/* <p><b>DNAS Connect</b> is available for download for both iOS and Android devices</p> */}
+            <div className="tips">
+              <h3 className='tips-subtitle-blue'>Discover DNAS Connect</h3>
+              <img className='dnas-app-logo' src={process.env.PUBLIC_URL + '/img/dnas-connect-logo.png'} alt='DNAS Connect app icon'/>
+              <p>Experience DNAS Connect, tailored to offer esteemed contract clients like you an efficient service placement platform.</p>
+              <b>Benefits of DNAS Connect:</b>
+              <ul>
+                <li><b>Exclusive Access:</b> As a valued contract client, be among the first to leverage the features of DNAS Connect.</li>
+                <li><b>Streamlined Service:</b> Place service calls with ease and ensure rapid assistance.</li>
+                <li><b>Stay Updated:</b> Keep informed with real-time updates and intelligent features.</li>
+              </ul>
+              <b>Begin Your Journey</b>
+              <p>Step into the future of our service with DNAS Connect</p>
+            </div>
+            
             <div className='qr-codes'>
               <div className='qr-code-container'>
+                <p><i className="fa-brands fa-app-store-ios"></i>   for iOS</p>
                 <img className='qr-code' src={process.env.PUBLIC_URL + '/img/dnas-connect-apple.png'} alt='app store qr code'/>
-                <p><i className="fa-brands fa-app-store-ios"></i>   App Store</p>
                 <a className='app-store-button' href='https://apps.apple.com/us/app/dnas-lite/id1531944898' target='_blank' rel='noopener noreferrer'>
-                <i className="fa-brands fa-apple"></i>   Get it on App Store
+                <i className="fa-brands fa-apple"></i>   App Store
                 </a>
               </div>
               
               <div className='qr-code-container'>
+                <p><i className="fa-brands fa-google-play"></i>   for Android</p>
                 <img className='qr-code' src={process.env.PUBLIC_URL + '/img/dnas-connect-google.png'} alt='play store qr code'/>
-                <p><i className="fa-brands fa-google-play"></i>   Google Play</p>
                 <a className='app-store-button' href='https://play.google.com/store/apps/details?id=com.dayniteit.dnaslite&pcampaignid=web_share' target='_blank' rel='noopener noreferrer'>
-                <i className="fa-brands fa-google-play"></i>   Get it on Google Play
+                <i className="fa-brands fa-google-play"></i>   Google Play
                 </a>
               </div>
             </div>
+            
             <div className="nav-buttons">
-              <button className='form-button back' type="button" onClick={home}>Back</button>
+              <button className='form-button back' type="button" onClick={home}>Home</button>
             </div>
           </div>
         )}
@@ -621,8 +659,9 @@ export default function Form() {
             </div>
             
             <div className="nav-buttons">
-              <button className='form-button back' type="button" onClick={back}>Back</button>
-              <button className='form-button next' type="button" onClick={addressValidation}>Next</button>
+              <button className='form-button back' type="button" onClick={back}><i className="fa-solid fa-caret-left" style={{"color": "#ffffff"}}></i> Back</button>
+              <button className='form-button next' type="button" onClick={nextPage}>Next <i className="fa-solid fa-caret-right" style={{"color": "#ffffff"}}></i></button>
+              {/* <button className='form-button next' type="button" onClick={addressValidation}>Next <i className="fa-solid fa-caret-right" style={{"color": "#ffffff"}}></i></button> */}
             </div>
           </div>
         )}
@@ -654,7 +693,7 @@ export default function Form() {
             <p>Alternative Phone Number Ext.</p>
             <input className="input number" type="tel" placeholder="Ext" {...register("Alternative_Phone_Number_Ext", {})} />
             
-            <h3 className="subTitle">Business Contact Info</h3>
+            {/* <h3 className="subTitle">Business Contact Info</h3>
             <h4>These are used by the aglorithm to match your info to our database records. Please provide the best response for the best result.</h4>
             <p>Business Email Addresses (Please provide a list of email address(es) under your company's email domain) <span className='required'>*</span></p>
             <p>Seperate by comma (,)</p>
@@ -664,19 +703,20 @@ export default function Form() {
             <p>Business Phone Numbers (Please provide a list phone number(s) that was used to contact DNAS before) <span className='required'>*</span></p>
             <p>Seperate by comma (,)</p>
             <input className="input text" type="text" placeholder="Business Phone Numbers" {...register("Business_Phone_Numbers", {required: true})} />
-            {errors['Business_Phone_Numbers'] && errors['Business_Phone_Numbers'].type === 'required' && <p style={{ color: 'red' }}>Business Phone Numbers is required.</p>}
+            {errors['Business_Phone_Numbers'] && errors['Business_Phone_Numbers'].type === 'required' && <p style={{ color: 'red' }}>Business Phone Numbers is required.</p>} */}
 
-            <div className="tips" style={{"marginTop": "20px"}}>
+            {/* <div className="tips" style={{"marginTop": "20px"}}>
               <h4><i className="fa-solid fa-circle-info" style={{"color": "#000000"}}></i> Tips for getting the right site</h4>
               <p>Make sure your business name and site address are correct. 
                 Pay attention to your business emails' domain addresses (ensure your are using the correct work email address). 
                 For business phone numbers, make sure you are using the numbers that you used to contact with DNAS.
               </p>
-            </div>
+            </div> */}
 
             <div className="nav-buttons">
-              <button className='form-button back' type="button" onClick={back}>Back</button>
-              <button className='form-button next' type="button" onClick={getSiteInfo}>Next</button>
+              <button className='form-button back' type="button" onClick={back}><i className="fa-solid fa-caret-left" style={{"color": "#ffffff"}}></i> Back</button>
+              <button className='form-button next' type="button" onClick={nextPage}>Next <i className="fa-solid fa-caret-right" style={{"color": "#ffffff"}}></i></button>
+              {/* <button className='form-button next' type="button" onClick={getSiteInfo}>Next</button> */}
             </div>
           </div>
         )}
@@ -685,25 +725,28 @@ export default function Form() {
           <div className='form-section'>
             <h1 className='title'>Confirm your site info</h1>
 
-            <h2 className='subTitle'>Matching Sites</h2>
-            <p>Based on information your provided, here are the possible sites from our database that match your information.</p>
+            {/* <h2 className='subTitle'>Matching Sites</h2> */}
+            <p>Here is your site information. If you believe this is wrong, please go back to edit your entries.</p>
             <div className="tips">
-              <h4 className="tips-subtitle">New customers</h4>
-              <p>You should <b>not</b> see any match listed. Please click <span className="confirm-button">Confirm Site</span> and we will reach out to confirm your request later.</p>
-
-              <h4 className="tips-subtitle">Returning customers</h4>
-              <p>If you see your site <b>listed among the matches</b>, please click <span className="confirm-button">Confirm Site</span> to proceed. Otherwise, please click <span className="back-button">Go back</span> and correct your information.</p>
-              {/* <h4>Returning customers</h4>
+              <h4 className="tips-subtitle">Businesss Name</h4>
+              <p>{watch('Business_Name')}</p>
+              {/* <p>You should <b>not</b> see any match listed. Please click <span className="confirm-button">Confirm Site</span> and we will reach out to confirm your request later.</p> */}
+              <h4 className="tips-subtitle">Site Address</h4>
               <p>
-                You should see your site information displayed below. You might see more than one site due to how we structure our database. 
-                If you see your site listed in the possible matches, please click 'Confirm Site' to proceed. 
-                Otherwise, please click 'Go back' and correct your information.
-              </p>
-              <h4>New customers</h4>
-              <p>Please click 'Confirm Site' and one of our agents will reach out to confirm your request later.</p> */}
+                {watch('Street_1')}
+                {watch('Street_2') ? ", " + watch('Street_2') : ""}
+                {watch('Street_3') ? ", " + watch('Street_3') : ""}
+                {watch('Street_4') ? ", " + watch('Street_4') : ""}</p>
+              <p>{watch('City')}, {watch('State')}, {watch('Zip')}</p>
+              <h4 className="tips-subtitle">Contact Info</h4>
+              <p><b>Full Name </b>{watch('First_Name')} {watch('Last_Name')}</p>
+              <p><b>Phone # </b>{watch('Phone_Number')} {watch('Phone_Number_Ext') ? ", ext " + watch('Phone_Number_Ext') : ""}</p>
+              <p><b>Email Address </b>{watch('Email_Address')}</p>
+              <p><b>Alternate Phone # </b>{watch('Alternative_Phone_Number')} {watch('Alternative_Phone_Number_Ext') ? ", ext " + watch('Alternative_Phone_Number_Ext') : ""}</p>
+              {/* <p>If you see your site <b>listed among the matches</b>, please click <span className="confirm-button">Confirm Site</span> to proceed. Otherwise, please click <span className="back-button">Go back</span> and correct your information.</p> */}
               
             </div>
-            <div className="site-info-wrapper">
+            {/* <div className="site-info-wrapper">
               {
                 possibleSites &&
                   possibleSites.map((site, index) => (
@@ -719,7 +762,7 @@ export default function Form() {
                   )
                 )
               }
-
+            </div> */}
               {/* {
                 similarSites &&
                   similarSites.map((site, index) => (
@@ -737,27 +780,25 @@ export default function Form() {
               } */}
 
               {
-                // (!possibleSites || possibleSites.length === 0) && (!similarSites || similarSites.length === 0) &&
-                (!possibleSites || possibleSites.length === 0) &&  
-                  <div className="site-info">
-                    <h4>No customer site from our database matches your information.</h4>
-                    <p>If you are a returning customer, please go back and correct your information. If you are a new customer, gracefully ignore this message and proceed to the next step.</p>
-                  </div>
+                // (!possibleSites || possibleSites.length === 0) &&  
+                //   <div className="site-info">
+                //     <h4>No customer site from our database matches your information.</h4>
+                //     <p>If you are a returning customer, please go back and correct your information. If you are a new customer, gracefully ignore this message and proceed to the next step.</p>
+                //   </div>
               }
-            </div>
 
 
-            <div className="tips">
+            {/* <div className="tips">
               <h4><i className="fa-solid fa-circle-info" style={{"color": "#000000"}}></i> Tips for getting the right site</h4>
               <p>Make sure your business name and site address are correct. 
                 Pay attention to your business emails' domain addresses (ensure your are using the correct work email address). 
                 For business phone numbers, make sure you are using the numbers that you used to contact with DNAS.
               </p>
-            </div>
+            </div> */}
             
             <div className="nav-buttons">
-              <button className='form-button back' type="button" onClick={back}>Go back</button>
-              <button className='form-button next' type="button" onClick={nextPage}>Confirm Site</button>
+              <button className='form-button back' type="button" onClick={back}><i className="fa-solid fa-caret-left" style={{"color": "#ffffff"}}></i> Back</button>
+              <button className='form-button next' type="button" onClick={loadEquipments}>Confirm <i className="fa-solid fa-caret-right" style={{"color": "#ffffff"}}></i></button>
             </div>
           </div>
         )}
@@ -813,7 +854,7 @@ export default function Form() {
             {errors['Location'] && errors['Location'].type === 'required' && <p style={{ color: 'red' }}>Exact Location (Instructions of access) is required.</p>}
 
 
-            <p>Equipment (Choose one from the list) <span className='required'>*</span></p>
+            <p>Type of Service (Choose one from the list) <span className='required'>*</span></p>
             {/* <select className="select" {...register("Type", { required: true })}>
               <option value="" disabled selected hidden>Select an option...</option>
               <option value="Refrigeration">Refrigeration</option>
@@ -821,9 +862,9 @@ export default function Form() {
               <option value="Kitchen">Kitchen</option>
               <option value="Plumbing">Plumbing</option>
             </select> */}
-            <div className="tips">
+            {/* <div className="tips">
               <i className="fa-solid fa-circle-info" style={{"color": "#000000"}}></i><p>If you don't see any equipment below, please reach out to <a href='mailto:clientconcierge@wearetheone.com'>clientconcierge@wearetheone.com</a></p>
-            </div>
+            </div> */}
             <input type="hidden" {...register("Equipment_RN", { required: true })}/>
             <input type="hidden" {...register("Equipment_Name", { required: true })}/>
             <input type="hidden" {...register("Equipment_ID", { required: true })}/>
@@ -836,45 +877,45 @@ export default function Form() {
                   <option value={siteEquipment['clntsteeqpmnt_rn']}>{siteEquipment['clntste_nme']} - {siteEquipment['clntsteeqpmnt_nme']} | {siteEquipment['clntsteeqpmnt_id']}</option>
               ))}
             </select> */}
-            <div className="equipment-list-wrapper">
-              <input
-                className="input text"
-                type="text"
-                placeholder="Search / filter this list (based on address, name, manufacturer, or model)"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                style={{"marginBottom": "1em"}} 
-              />
-              <ul className="equipment-list">
-                  {possibleSiteEquipments
-                    .filter(siteEquipment => 
-                      siteEquipment['clntste_nme'].toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      siteEquipment['clntsteeqpmnt_nme'].toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      siteEquipment['clntsteeqpmnt_mnfctrr'].toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      siteEquipment['clntsteeqpmnt_mnfctrr_mdl'].toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                    .map((siteEquipment) => (
-                      <li 
-                          key={siteEquipment['clntsteeqpmnt_rn']} 
-                          onClick={() => handleEquipmentClick(siteEquipment)}
-                          className={selectedEquipment === siteEquipment['clntsteeqpmnt_rn'] ? 'selected' : ''}
-                      >
-                        <div className="equipment-list-li-content">
-                          <div>
-                            {siteEquipment['clntste_nme']}
-                            
-                            <p className="equipment-list-li-content-text">
-                              <b className="text">Name&nbsp;&nbsp;</b><p className="text">{siteEquipment['clntsteeqpmnt_nme']}&nbsp;&nbsp;</p>
-                              <b className="text">Manufacturer&nbsp;&nbsp;</b><p className="text">{siteEquipment['clntsteeqpmnt_mnfctrr'] ? siteEquipment['clntsteeqpmnt_mnfctrr'] : "n/a"}&nbsp;&nbsp;</p>
-                              <b className="text">Model&nbsp;&nbsp;</b><p className="text">{siteEquipment['clntsteeqpmnt_mnfctrr_mdl'] ? siteEquipment['clntsteeqpmnt_mnfctrr_mdl'] : "n/a"}</p>
-                            </p>
-                          </div>
-                          <i className="equipment-list-li-content-check fa-solid fa-circle-check" style={{"color": "#ffffff"}}></i>
+            {/* <div className="equipment-list-wrapper"> */}
+            {/* <input
+              className="input text"
+              type="text"
+              placeholder="Search / filter this list (based on address, name, manufacturer, or model)"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              style={{"marginBottom": "1em"}} 
+            /> */}
+            <ul className="equipment-list">
+                {possibleSiteEquipments
+                  // .filter(siteEquipment => 
+                  //   siteEquipment['clntste_nme'].toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  //   siteEquipment['clntsteeqpmnt_nme'].toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  //   siteEquipment['clntsteeqpmnt_mnfctrr'].toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  //   siteEquipment['clntsteeqpmnt_mnfctrr_mdl'].toLowerCase().includes(searchTerm.toLowerCase())
+                  // )
+                  .map((siteEquipment) => (
+                    <li 
+                        key={siteEquipment['clntsteeqpmnt_rn']} 
+                        onClick={() => handleEquipmentClick(siteEquipment)}
+                        className={selectedEquipment === siteEquipment['clntsteeqpmnt_rn'] ? 'selected' : ''}
+                    >
+                      <div className="equipment-list-li-content">
+                        <div>
+                          {/* {siteEquipment['clntste_nme']} */}
+                          {/* Non-contract form customer site */}
+                          <p className="equipment-list-li-content-text">
+                            Your equipment requires&nbsp;<p className="text"><b className="text">{siteEquipment['clntsteeqpmnt_nme']}</b></p>
+                            {/* <b className="text">Manufacturer&nbsp;&nbsp;</b><p className="text">{siteEquipment['clntsteeqpmnt_mnfctrr'] ? siteEquipment['clntsteeqpmnt_mnfctrr'] : "n/a"}&nbsp;&nbsp;</p> */}
+                            {/* <b className="text">Model&nbsp;&nbsp;</b><p className="text">{siteEquipment['clntsteeqpmnt_mnfctrr_mdl'] ? siteEquipment['clntsteeqpmnt_mnfctrr_mdl'] : "n/a"}</p> */}
+                          </p>
                         </div>
-                      </li>
-                  ))}
-              </ul>
-            </div>
+                        <i className="equipment-list-li-content-check fa-solid fa-circle-check" style={{"color": "#ffffff"}}></i>
+                      </div>
+                    </li>
+                ))}
+            </ul>
+            {/* </div> */}
             {errors['Equipment_RN'] && errors['Equipment_RN'].type === 'required' && <p style={{ color: 'red' }}>Equipment is required.</p>}
 
             <p>Description of Problem <span className='required'>*</span></p>
