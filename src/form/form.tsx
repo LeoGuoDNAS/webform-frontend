@@ -924,8 +924,8 @@ export default function Form() {
             
 
             <div className="nav-buttons">
-              <button className='form-button back' type="button" onClick={back}>Back</button>
-              <button className='form-button next' type="button" onClick={nextPage}>Next</button>
+              <button className='form-button back' type="button" onClick={back}><i className="fa-solid fa-caret-left" style={{"color": "#ffffff"}}></i> Back</button>
+              <button className='form-button next' type="button" onClick={nextPage}>Next <i className="fa-solid fa-caret-right" style={{"color": "#ffffff"}}></i></button>
             </div>
           </div>
         )}
@@ -1017,7 +1017,7 @@ export default function Form() {
             <textarea className="input textarea" {...register("Comments", {})} />
 
             <div className="nav-buttons">
-              <button className='form-button back' type="button" onClick={back}>Back</button>
+              <button className='form-button back' type="button" onClick={back}><i className="fa-solid fa-caret-left" style={{"color": "#ffffff"}}></i> Back</button>
               <input className='form-button submit' type="submit" value="Submit" />
             </div>
           </div>
